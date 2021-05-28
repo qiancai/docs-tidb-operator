@@ -73,8 +73,8 @@ kubectl annotate --overwrite tc ${cluster_name} -n ${namespace} tidb.pingcap.com
 > {{< copyable "shell-regular" >}}
 > 
 > ```shell
-kubectl annotate tc ${cluster_name} -n ${namespace} tidb.pingcap.com/force-upgrade-
-```
+> kubectl annotate tc ${cluster_name} -n ${namespace} tidb.pingcap.com/force-upgrade-
+> ```
 
 ### 修改 TiDB 集群配置
 
@@ -159,8 +159,8 @@ helm upgrade ${release_name} pingcap/tidb-cluster -f values.yaml --version=${cha
 > {{< copyable "shell-regular" >}}
 > 
 > ```shell
-kubectl annotate tc ${release_name} -n ${namespace} tidb.pingcap.com/force-upgrade-
-```
+> kubectl annotate tc ${release_name} -n ${namespace} tidb.pingcap.com/force-upgrade-
+> ```
 
 > **注意：**
 > 
