@@ -54,13 +54,13 @@ aliases:
 > 由于 `rclone` 存在[问题](https://rclone.org/s3/#key-management-system-kms)，如果使用 Amazon S3 存储备份，并且 Amazon S3 开启了 `AWS-KMS` 加密，需要在本节示例中的 yaml 文件里添加如下 `spec.s3.options` 配置以保证备份恢复成功：
 > 
 > ```yaml
-spec:
-  ...
-  s3:
-    ...
-    options:
-    - --ignore-checksum
-```
+> spec:
+>   ...
+>   s3:
+>     ...
+>     options:
+>     - --ignore-checksum
+> ```
 
 1. 创建 Restore customer resource (CR)，将制定备份数据恢复至 TiDB 集群
 
