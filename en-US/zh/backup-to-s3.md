@@ -55,13 +55,13 @@ Ad-hoc 全量备份通过创建一个自定义的 `Backup` custom resource (CR) 
 > 由于 `rclone` 存在[问题](https://rclone.org/s3/#key-management-system-kms)，如果使用 Amazon S3 存储备份，并且 Amazon S3 开启了 `AWS-KMS` 加密，需要在本节示例中的 yaml 文件里添加如下 `spec.s3.options` 配置以保证备份成功：
 > 
 > ```yaml
-spec:
-  ...
-  s3:
-    ...
-    options:
-    - --ignore-checksum
-```
+> spec:
+>   ...
+>   s3:
+>     ...
+>     options:
+>     - --ignore-checksum
+> ```
 
 + 创建 `Backup` CR，通过 AccessKey 和 SecretKey 授权的方式将数据备份到 Amazon S3：
 
@@ -266,15 +266,15 @@ kubectl get bk -n test1 -owide
 > 由于 `rclone` 存在[问题](https://rclone.org/s3/#key-management-system-kms)，如果使用 Amazon S3 存储备份，并且 Amazon S3 开启了 `AWS-KMS` 加密，需要在本节示例中的 yaml 文件里添加如下 `spec.backupTemplate.s3.options` 配置以保证备份成功：
 > 
 > ```yaml
-spec:
-  ...
-  backupTemplate:
-    ...
-    s3:
-      ...
-      options:
-      - --ignore-checksum
-```
+> spec:
+>   ...
+>   backupTemplate:
+>     ...
+>     s3:
+>       ...
+>       options:
+>       - --ignore-checksum
+> ```
 
 + 创建 `BackupSchedule` CR 开启 TiDB 集群的定时全量备份，通过 AccessKey 和 SecretKey 授权的方式将数据备份到 Amazon S3：
 
