@@ -486,7 +486,7 @@ helm inspect values ${chart_name} --version=${chart_version} > values.yaml
 {{< copyable "shell-regular" >}}
 
 ```shell
-helm inspect values pingcap/tidb-operator --version=v1.2.0-beta.2 > values-tidb-operator.yaml
+helm inspect values pingcap/tidb-operator --version=v1.2.0-rc.1 > values-tidb-operator.yaml
 ```
 
 ### 使用 Helm Chart 部署
@@ -502,7 +502,7 @@ helm install ${name} ${chart_name} --namespace=${namespace} --version=${chart_ve
 {{< copyable "shell-regular" >}}
 
 ```shell
-helm install tidb-operator pingcap/tidb-operator --namespace=tidb-admin --version=v1.2.0-beta.2 -f values-tidb-operator.yaml
+helm install tidb-operator pingcap/tidb-operator --namespace=tidb-admin --version=v1.2.0-rc.1 -f values-tidb-operator.yaml
 ```
 
 ### 查看已经部署的 Helm Release
@@ -526,7 +526,7 @@ helm upgrade ${name} ${chart_name} --version=${chart_version} -f ${values_file}
 {{< copyable "shell-regular" >}}
 
 ```shell
-helm upgrade tidb-operator pingcap/tidb-operator --version=v1.2.0-beta.2 -f values-tidb-operator.yaml
+helm upgrade tidb-operator pingcap/tidb-operator --version=v1.2.0-rc.1 -f values-tidb-operator.yaml
 ```
 
 ### 删除 Helm Release
@@ -534,7 +534,7 @@ helm upgrade tidb-operator pingcap/tidb-operator --version=v1.2.0-beta.2 -f valu
 {{< copyable "shell-regular" >}}
 
 ```shell
-helm uninstall ${name}
+helm uninstall ${name} -n ${namespace}
 ```
 
 示例：
@@ -542,7 +542,7 @@ helm uninstall ${name}
 {{< copyable "shell-regular" >}}
 
 ```shell
-helm uninstall tidb-operator
+helm uninstall tidb-operator -n tidb-admin
 ```
 
 ### 更多
