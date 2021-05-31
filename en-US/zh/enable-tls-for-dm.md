@@ -480,7 +480,7 @@ metadata:
 spec:
   tlsCluster:
     enabled: true
-  version: v2.0.2
+  version: v2.0.3
   pvReclaimPolicy: Retain
   discovery: {}
   master:
@@ -546,7 +546,7 @@ metadata:
   name: ${cluster_name}
   namespace: ${namespace}
 spec:
-  version: v2.0.2
+  version: v2.0.3
   pvReclaimPolicy: Retain
   discovery: {}
   tlsClientSecretNames:
@@ -564,6 +564,7 @@ spec:
 
     ``` yaml
     source-id: mysql-replica-01
+    relay-dir: /var/lib/dm-worker/relay
     from:
       host: ${mysql_host1}
       user: dm
@@ -591,6 +592,14 @@ spec:
         ssl-ca: /var/lib/source-tls/${tidb_secret_name}/ca.crt
         ssl-cert: /var/lib/source-tls/${tidb_secret_name}/tls.crt
         ssl-key: /var/lib/source-tls/${tidb_secret_name}/tls.key
+
+    mysql-instances:
+    - source-id: "replica-01"
+      loader-config-name: "global"
+
+    loaders:
+      global:
+        dir: "/var/lib/dm-worker/dumped_data"
     ```
 
 ### 第四步：启动同步任务
