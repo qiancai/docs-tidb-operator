@@ -12,6 +12,11 @@ aliases:
 1. 为即将被创建的 TiDB 集群的每个组件生成证书：
     - 为 PD/TiKV/TiDB/Pump/Drainer/TiFlash/TiKV Importer/TiDB Lightning 组件分别创建一套 Server 端证书，保存为 Kubernetes Secret 对象：`${cluster_name}-${component_name}-cluster-secret`
     - 为它们的各种客户端创建一套共用的 Client 端证书，保存为 Kubernetes Secret 对象：`${cluster_name}-cluster-client-secret`
+
+    > **注意：**
+    > 
+    > 创建的 Secret 对象必须符合上述命名规范，否则将导致各组件部署失败。
+
 2. 部署集群，设置 `.spec.tlsCluster.enabled` 属性为 `true`；
 3. 配置 `pd-ctl`，`tikv-ctl` 连接集群。
 
@@ -1299,7 +1304,7 @@ aliases:
     spec:
      tlsCluster:
        enabled: true
-     version: v5.0.1
+     version: v5.1.0
      timezone: UTC
      pvReclaimPolicy: Retain
      pd:
@@ -1355,7 +1360,7 @@ aliases:
        version: 6.0.1
      initializer:
        baseImage: pingcap/tidb-monitor-initializer
-       version: v5.0.1
+       version: v5.1.0
      reloader:
        baseImage: pingcap/tidb-monitor-reloader
        version: v1.0.1
