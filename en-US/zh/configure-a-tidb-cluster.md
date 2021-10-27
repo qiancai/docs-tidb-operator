@@ -44,9 +44,9 @@ aliases:
 
 相关参数的格式如下：
 
-- `spec.version`，格式为 `imageTag`，例如 `v5.2.0`
+- `spec.version`，格式为 `imageTag`，例如 `v5.2.1`
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`，格式为 `imageName`，例如 `pingcap/tidb`
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v5.2.0`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v5.2.1`
 
 ### 推荐配置
 
@@ -176,7 +176,7 @@ kind: TidbCluster
 metadata:
   name: basic
 spec:
-  version: v5.2.0
+  version: v5.2.1
   pvReclaimPolicy: Retain
   discovery:
     limits:
@@ -289,7 +289,7 @@ metadata:
 spec:
 ....
   tidb:
-    image: pingcap/tidb:v5.2.0
+    image: pingcap/tidb:v5.2.1
     imagePullPolicy: IfNotPresent
     replicas: 1
     service:
@@ -455,7 +455,7 @@ kind: TidbCluster
 metadata:
   name: basic
 spec:
-  version: v5.2.0
+  version: v5.2.1
   pvReclaimPolicy: Retain
   discovery: {}
   pd:
