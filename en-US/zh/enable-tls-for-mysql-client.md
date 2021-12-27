@@ -540,19 +540,22 @@ aliases:
          pvReclaimPolicy: Retain
          pd:
            baseImage: pingcap/pd
+           maxFailoverCount: 0
            replicas: 1
            requests:
-             storage: "1Gi"
+             storage: "10Gi"
            config: {}
            tlsClientSecretName: ${cluster_name}-pd-dashboard-client-secret
          tikv:
            baseImage: pingcap/tikv
+           maxFailoverCount: 0
            replicas: 1
            requests:
-             storage: "1Gi"
+             storage: "100Gi"
            config: {}
          tidb:
            baseImage: pingcap/tidb
+           maxFailoverCount: 0
            replicas: 1
            service:
              type: ClusterIP
@@ -674,7 +677,7 @@ kubectl get secret -n ${namespace} ${cluster_name}-tidb-client-secret  -ojsonpat
 {{< copyable "shell-regular" >}}
 
 ``` shell
-mysql -uroot -p -P 4000 -h ${tidb_host} --ssl-cert=client-tls.crt --ssl-key=client-tls.key --ssl-ca=client-ca.crt
+mysql --comments -uroot -p -P 4000 -h ${tidb_host} --ssl-cert=client-tls.crt --ssl-key=client-tls.key --ssl-ca=client-ca.crt
 ```
 
 > **注意：**
