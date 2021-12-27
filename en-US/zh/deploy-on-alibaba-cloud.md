@@ -176,7 +176,7 @@ aliases:
       ...
       tiflash:
         baseImage: pingcap/tiflash
-        maxFailoverCount: 3
+        maxFailoverCount: 0
         nodeSelector:
           dedicated: TIDB_CLUSTER_NAME-tiflash
         replicas: 1
@@ -260,6 +260,10 @@ aliases:
   kubectl --kubeconfig credentials/kubeconfig create -f db-monitor.yaml -n ${namespace}
   ```
 
+> **注意：**
+> 
+> 如果要将 TiDB 集群部署到 ARM64 机器上，可以参考[在 ARM64 机器上部署 TiDB 集群](deploy-cluster-on-arm64.md)。
+
 ## 连接数据库
 
 通过堡垒机可连接 TiDB 集群进行测试，相关信息在安装完成后的输出中均可找到：
@@ -273,7 +277,7 @@ ssh -i credentials/${cluster_name}-key.pem root@${bastion_ip}
 {{< copyable "shell-regular" >}}
 
 ```shell
-mysql -h ${tidb_lb_ip} -P 4000 -u root
+mysql --comments -h ${tidb_lb_ip} -P 4000 -u root
 ```
 
 `tidb_lb_ip` 为 TiDB Service 的 LoadBalancer IP。
