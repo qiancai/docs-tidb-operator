@@ -97,9 +97,13 @@ If you see `Ready` for all nodes, congratulations! You've set up your first Kube
 TiDB Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#customresourcedefinitions) to extend Kubernetes. Therefore, to use TiDB Operator, you must first create the `TidbCluster` CRD.
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/manifests/crd.yaml && \
+kubectl create -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/manifests/crd.yaml && \
 kubectl get crd tidbclusters.pingcap.com
 ```
+
+> **Note:**
+>
+> For Kubernetes earlier than 1.16, only v1beta1 CRD is supported, so you need to change `crd.yaml` in the above command to `crd_v1beta1.yaml`.
 
 After the `TidbCluster` CRD is created, install TiDB Operator in your Kubernetes cluster.
 
@@ -157,7 +161,7 @@ From your Cloud Shell:
 
 ```shell
 sudo apt-get install -y mysql-client && \
-mysql -h 127.0.0.1 -u root -P 4000
+mysql --comments -h 127.0.0.1 -u root -P 4000
 ```
 
 Try out a MySQL command inside your MySQL terminal:
