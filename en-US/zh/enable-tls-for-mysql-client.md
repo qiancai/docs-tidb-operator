@@ -535,7 +535,7 @@ aliases:
          name: ${cluster_name}
          namespace: ${namespace}
         spec:
-         version: v5.2.1
+         version: v5.3.0
          timezone: UTC
          pvReclaimPolicy: Retain
          pd:
