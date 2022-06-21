@@ -6,9 +6,19 @@ aliases: ['/docs/tidb-in-kubernetes/dev/backup-to-s3/']
 
 # Back up Data to S3-Compatible Storage Using Dumpling
 
-This document describes how to back up the data of the TiDB cluster in Kubernetes to the S3-compatible storage. "Backup" in this document refers to full backup (ad-hoc full backup and scheduled full backup). For the underlying implementation, [Dumpling](https://docs.pingcap.com/tidb/dev/export-or-backup-using-dumpling) is used to get the logic backup of the TiDB cluster, and then this backup data is sent to the S3-compatible storage.
+This document describes how to back up the data of the TiDB cluster in Kubernetes to an S3-compatible storage. "Backup" in this document refers to full backup (ad-hoc full backup and scheduled full backup).
 
-The backup method described in this document is implemented based on CustomResourceDefinition (CRD) in TiDB Operator v1.1 or later versions.
+The backup method described in this document is implemented based on CustomResourceDefinition (CRD) in TiDB Operator v1.1 or later versions. For the underlying implementation, [Dumpling](https://docs.pingcap.com/tidb/dev/export-or-backup-using-dumpling) is used to get the logic backup of the TiDB cluster, and then this backup data is sent to the S3-compatible storage.
+
+Dumpling is a data export tool that exports data stored in TiDB/MySQL as SQL or CSV files and can be used to make a logical full backup or export.
+
+## Usage scenarios
+
+You can use the backup method described in this document if you want to make an [ad-hoc full backup](#ad-hoc-full-backup-to-s3-compatible-storage) or [scheduled full backup](#scheduled-full-backup-to-s3-compatible-storage) of the TiDB cluster data to S3-compatible storages with the following needs:
+
+- To export SQL or CSV files
+- To limit the memory usage of a single SQL statement
+- To export the historical data snapshot of TiDB
 
 ## Ad-hoc full backup to S3-compatible storage
 
@@ -16,7 +26,28 @@ Ad-hoc full backup describes the backup by creating a `Backup` custom resource (
 
 For the current S3-compatible storage types, Ceph and Amazon S3 work normally as tested. Therefore, this document shows examples in which the data of the `demo1` TiDB cluster in the `tidb-cluster` Kubernetes namespace is backed up to Ceph and Amazon S3 respectively.
 
-### Prerequisites for ad-hoc full backup
+### Prerequisites
+
+Before you use Dumpling to back up the TiDB cluster data to the S3-compatible storage, make sure that you have the following privileges:
+
+* The `SELECT` and `UPDATE` privileges of the `mysql.tidb` table: Before and after the backup, the `Backup` CR needs a database account with these privileges to adjust the GC time.
+* The global privileges: `SELECT`, `RELOAD`, `LOCK TABLES` and `REPLICATION CLIENT`
+
+An example for creating a backup user:
+
+```sql
+CREATE USER 'backup'@'%' IDENTIFIED BY '...';
+GRANT
+  SELECT, RELOAD, LOCK TABLES, REPLICATION CLIENT
+  ON *.*
+  TO 'backup'@'%';
+GRANT
+  UPDATE, SELECT
+  ON mysql.tidb
+  TO 'backup'@'%';
+```
+
+### Step 1: Prepare for ad-hoc full backup
 
 1. Execute the following command to create the role-based access control (RBAC) resources in the `tidb-cluster` namespace based on [backup-rbac.yaml](https://raw.githubusercontent.com/pingcap/tidb-operator/master/manifests/backup/backup-rbac.yaml):
 
@@ -40,26 +71,7 @@ For the current S3-compatible storage types, Ceph and Amazon S3 work normally as
     kubectl create secret generic backup-demo1-tidb-secret --from-literal=password=${password} --namespace=tidb-cluster
     ```
 
-### Required database account privileges
-
-* The `SELECT` and `UPDATE` privileges of the `mysql.tidb` table: Before and after the backup, the `Backup` CR needs a database account with these privileges to adjust the GC time.
-* The global privileges: `SELECT`, `RELOAD`, `LOCK TABLES` and `REPLICATION CLIENT`
-
-An example for creating a backup user:
-
-```sql
-CREATE USER 'backup'@'%' IDENTIFIED BY '...';
-GRANT
-  SELECT, RELOAD, LOCK TABLES, REPLICATION CLIENT
-  ON *.*
-  TO 'backup'@'%';
-GRANT
-  UPDATE, SELECT
-  ON mysql.tidb
-  TO 'backup'@'%';
-```
-
-### Ad-hoc backup process
+### Step 2: Perform ad-hoc backup
 
 > **Note:**
 >
@@ -74,18 +86,14 @@ GRANT
 >     - --ignore-checksum
 > ```
 
-> **Note**
->
-> This section lists multiple storage access methods. Only follow the method that matches your situation.
->
-> The methods are as follows:
-> 
-> - Amazon S3 by importing AccessKey and SecretKey
-> - Ceph by importing AccessKey and SecretKey
-> - Amazon S3 by binding IAM with Pod
-> - Amazon S3 by binding IAM with ServiceAccount
+This section lists multiple storage access methods. Only follow the method that matches your situation. The methods are as follows:
 
-+ Create the `Backup` CR, and back up cluster data to Amazon S3 by importing AccessKey and SecretKey to grant permissions:
+- Amazon S3 by importing AccessKey and SecretKey
+- Ceph by importing AccessKey and SecretKey
+- Amazon S3 by binding IAM with Pod
+- Amazon S3 by binding IAM with ServiceAccount
+
++ Method 1: Create the `Backup` CR, and back up cluster data to Amazon S3 by importing AccessKey and SecretKey to grant permissions:
 
     {{< copyable "shell-regular" >}}
 
@@ -129,7 +137,7 @@ GRANT
       storageSize: 10Gi
     ```
 
-+ Create the `Backup` CR, and back up data to Ceph by importing AccessKey and SecretKey to grant permissions:
++ Method 2: Create the `Backup` CR, and back up data to Ceph by importing AccessKey and SecretKey to grant permissions:
 
     {{< copyable "shell-regular" >}}
 
@@ -170,7 +178,7 @@ GRANT
       storageSize: 10Gi
     ```
 
-+ Create the `Backup` CR, and back up data to Amazon S3 by binding IAM with Pod to grant permissions:
++ Method 3: Create the `Backup` CR, and back up data to Amazon S3 by binding IAM with Pod to grant permissions:
 
     {{< copyable "shell-regular" >}}
 
@@ -216,7 +224,7 @@ GRANT
       storageSize: 10Gi
     ```
 
-+ Create the `Backup` CR, and back up data to Amazon S3 by binding IAM with ServiceAccount to grant permissions:
++ Method 4: Create the `Backup` CR, and back up data to Amazon S3 by binding IAM with ServiceAccount to grant permissions:
 
     {{< copyable "shell-regular" >}}
 
@@ -261,7 +269,7 @@ GRANT
       storageSize: 10Gi
     ```
 
-In the examples above, all data of the TiDB cluster is exported and backed up to Amazon S3 or Ceph. You can ignore the `acl`, `endpoint`, and `storageClass` fields in the Amazon S3 configuration. Other S3-compatible storages can also use a configuration similar to that of Amazon S3. You can also leave the fields empty if you do not need to configure them, as shown in the above Ceph configuration. For more information about S3-compatible storage configuration, refer to [S3 storage fields](backup-restore-overview.md#s3-storage-fields).
+In the examples above, all data of the TiDB cluster is exported and backed up to Amazon S3 or Ceph. You can ignore the `acl`, `endpoint`, and `storageClass` fields in the Amazon S3 configuration. Other S3-compatible storages can also use a configuration similar to that of Amazon S3. You can also leave the fields empty if you do not need to configure them, as shown in the above Ceph configuration. For more information about S3-compatible storage configuration, refer to [S3 storage fields](backup-restore-cr.md#s3-storage-fields).
 
 `spec.dumpling` refers to Dumpling-related configuration. You can specify Dumpling's operation parameters in the `options` field. See [Dumpling Option list](https://docs.pingcap.com/tidb/stable/dumpling-overview#option-list-of-dumpling) for more information. These configuration items of Dumpling can be ignored by default. When these items are not specified, the default values of `options` fields are as follows:
 
@@ -271,7 +279,7 @@ options:
 - --rows=10000
 ```
 
-For more information about the `Backup` CR fields, refer to [Backup CR fields](backup-restore-overview.md#backup-cr-fields).
+For more information about the `Backup` CR fields, refer to [Backup CR fields](backup-restore-cr.md#backup-cr-fields).
 
 After creating the `Backup` CR, use the following command to check the backup status:
 
@@ -295,11 +303,11 @@ To run ad-hoc backup again, you need to [delete the backup CR](backup-restore-ov
 
 You can set a backup policy to perform scheduled backups of the TiDB cluster, and set a backup retention policy to avoid excessive backup items. A scheduled full backup is described by a custom `BackupSchedule` CR object. A full backup is triggered at each backup time point. Its underlying implementation is the ad-hoc full backup.
 
-### Prerequisites for scheduled backup
+### Step 1: Prepare for scheduled backup
 
-The prerequisites for the scheduled backup is the same as the [prerequisites for ad-hoc full backup](#prerequisites-for-ad-hoc-full-backup).
+The prerequisites for the scheduled backup is the same as the [prepare for ad-hoc full backup](#step-1-prepare-for-ad-hoc-full-backup).
 
-### Scheduled backup process
+### Step 2: Perform scheduled backup
 
 > **Note:**
 >
@@ -316,7 +324,7 @@ The prerequisites for the scheduled backup is the same as the [prerequisites for
 >       - --ignore-checksum
 > ```
 
-+ Create the `BackupSchedule` CR to enable the scheduled full backup to Amazon S3 by importing AccessKey and SecretKey to grant permissions:
++ Method 1: Create the `BackupSchedule` CR to enable the scheduled full backup to Amazon S3 by importing AccessKey and SecretKey to grant permissions:
 
     {{< copyable "shell-regular" >}}
 
@@ -365,7 +373,7 @@ The prerequisites for the scheduled backup is the same as the [prerequisites for
         storageSize: 10Gi
     ```
 
-+ Create the `BackupSchedule` CR to enable the scheduled full backup to Ceph by importing AccessKey and SecretKey to grant permissions:
++ Method 2: Create the `BackupSchedule` CR to enable the scheduled full backup to Ceph by importing AccessKey and SecretKey to grant permissions:
 
     {{< copyable "shell-regular" >}}
 
@@ -411,7 +419,7 @@ The prerequisites for the scheduled backup is the same as the [prerequisites for
         storageSize: 10Gi
     ```
 
-+ Create the `BackupSchedule` CR to enable the scheduled full backup, and back up the cluster data to Amazon S3 by binding IAM with Pod to grant permissions:
++ Method 3: Create the `BackupSchedule` CR to enable the scheduled full backup, and back up the cluster data to Amazon S3 by binding IAM with Pod to grant permissions:
 
     {{< copyable "shell-regular" >}}
 
@@ -461,7 +469,7 @@ The prerequisites for the scheduled backup is the same as the [prerequisites for
         storageSize: 10Gi
     ```
 
-+ Create the `BackupSchedule` CR to enable the scheduled full backup, and back up the cluster data to Amazon S3 by binding IAM with ServiceAccount to grant permissions:
++ Method 4: Create the `BackupSchedule` CR to enable the scheduled full backup, and back up the cluster data to Amazon S3 by binding IAM with ServiceAccount to grant permissions:
 
     {{< copyable "shell-regular" >}}
 
@@ -528,7 +536,7 @@ kubectl get bk -l tidb.pingcap.com/backup-schedule=demo1-backup-schedule-s3 -n t
 
 From the example above, you can see that the `backupSchedule` configuration consists of two parts. One is the unique configuration of `backupSchedule`, and the other is `backupTemplate`.
 
-`backupTemplate` specifies the configuration related to the cluster and remote storage, which is the same as the `spec` configuration of [the `Backup` CR](backup-restore-overview.md#backup-cr-fields). For the unique configuration of `backupSchedule`, refer to [BackupSchedule CR fields](backup-restore-overview.md#backupschedule-cr-fields).
+`backupTemplate` specifies the configuration related to the cluster and remote storage, which is the same as the `spec` configuration of [the `Backup` CR](backup-restore-cr.md#backup-cr-fields). For the unique configuration of `backupSchedule`, refer to [BackupSchedule CR fields](backup-restore-cr.md#backupschedule-cr-fields).
 
 > **Note:**
 >
@@ -538,7 +546,7 @@ From the example above, you can see that the `backupSchedule` configuration cons
 
 ## Delete the backup CR
 
-Refer to [Delete the Backup CR](backup-restore-overview.md#delete-the-backup-cr).
+After the backup, you might need to delete the backup CR. For details, refer to [Delete the Backup CR](backup-restore-overview.md#delete-the-backup-cr).
 
 ## Troubleshooting
 

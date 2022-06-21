@@ -23,6 +23,14 @@ To enable TLS for the MySQL client, perform the following steps:
 
 2. [Deploy the cluster](#deploy-the-tidb-cluster), and set `.spec.tidb.tlsClient.enabled` to `true`.
 
+    * To skip TLS authentication for internal components that serve as the MySQL client (such as TidbInitializer, Dashboard, Backup, and Restore), you can add the `tidb.tidb.pingcap.com/skip-tls-when-connect-tidb="true"` annotation to the cluster's corresponding `TidbCluster`.
+    * To disable the client CA certificate authentication on the TiDB server, you can set `.spec.tidb.tlsClient.disableClientAuthn` to `true`. This means skipping setting the `ssl-ca` parameter when you [configure TiDB server to enable secure connections](https://docs.pingcap.com/tidb/stable/enable-tls-between-clients-and-servers#configure-tidb-server-to-use-secure-connections).
+    * To skip the CA certificate authentication for internal components that serve as the MySQL client, you can set `.spec.tidb.tlsClient.skipInternalClientCA` to `true`.
+
+    > **Note:**
+    >
+    > For an existing cluster, if you change `.spec.tidb.tlsClient.enabled` from `false` to `true`, the TiDB Pods will be rolling restarted.
+
 3. [Configure the MySQL client to use an encrypted connection](#configure-the-mysql-client-to-use-an-encrypted-connection).
 
 If you need to renew the existing TLS certificate, refer to [Renew and Replace the TLS Certificate](renew-tls-certificate.md).
@@ -220,7 +228,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
     Then, create a `tidb-server-issuer.yaml` file with the following content:
 
     ```yaml
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Issuer
     metadata:
       name: ${cluster_name}-selfsigned-ca-issuer
@@ -228,7 +236,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
     spec:
       selfSigned: {}
     ---
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Certificate
     metadata:
       name: ${cluster_name}-ca
@@ -243,7 +251,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
         name: ${cluster_name}-selfsigned-ca-issuer
         kind: Issuer
     ---
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Issuer
     metadata:
       name: ${cluster_name}-tidb-issuer
@@ -274,7 +282,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
     First, create a `tidb-server-cert.yaml` file with the following content:
 
     ``` yaml
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Certificate
     metadata:
       name: ${cluster_name}-tidb-server-secret
@@ -283,7 +291,8 @@ You can generate multiple sets of client-side certificates. At least one set of 
       secretName: ${cluster_name}-tidb-server-secret
       duration: 8760h # 365d
       renewBefore: 360h # 15d
-      organization:
+      subject:
+        organizations:
         - PingCAP
       commonName: "TiDB Server"
       usages:
@@ -325,7 +334,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
         - `127.0.0.1`
         - `::1`
     - Add the Issuer created above in the `issuerRef`
-    - For other attributes, refer to [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1alpha2.CertificateSpec).
+    - For other attributes, refer to [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec).
 
     Execute the following command to generate the certificate:
 
@@ -342,7 +351,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
     Create a `tidb-client-cert.yaml` file with the following content:
 
     ``` yaml
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Certificate
     metadata:
       name: ${cluster_name}-tidb-client-secret
@@ -351,7 +360,8 @@ You can generate multiple sets of client-side certificates. At least one set of 
       secretName: ${cluster_name}-tidb-client-secret
       duration: 8760h # 365d
       renewBefore: 360h # 15d
-      organization:
+      subject:
+        organizations:
         - PingCAP
       commonName: "TiDB Client"
       usages:
@@ -368,7 +378,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
     - Add `client auth` in `usages`
     - `dnsNames` and `ipAddresses` are not required
     - Add the Issuer created above in the `issuerRef`
-    - For other attributes, refer to [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1alpha2.CertificateSpec)
+    - For other attributes, refer to [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec)
 
     Execute the following command to generate the certificate:
 
@@ -396,7 +406,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
     1. Create a `tidb-components-client-cert.yaml` file with the following content:
 
         ```yaml
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-tidb-initializer-client-secret
@@ -405,7 +415,8 @@ You can generate multiple sets of client-side certificates. At least one set of 
           secretName: ${cluster_name}-tidb-initializer-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "TiDB Initializer client"
           usages:
@@ -415,7 +426,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
             kind: Issuer
             group: cert-manager.io
         ---
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-pd-dashboard-client-secret
@@ -424,7 +435,8 @@ You can generate multiple sets of client-side certificates. At least one set of 
           secretName: ${cluster_name}-pd-dashboard-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "PD Dashboard client"
           usages:
@@ -434,7 +446,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
             kind: Issuer
             group: cert-manager.io
         ---
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-backup-client-secret
@@ -443,7 +455,8 @@ You can generate multiple sets of client-side certificates. At least one set of 
           secretName: ${cluster_name}-backup-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "Backup client"
           usages:
@@ -453,7 +466,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
             kind: Issuer
             group: cert-manager.io
         ---
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-restore-client-secret
@@ -462,7 +475,8 @@ You can generate multiple sets of client-side certificates. At least one set of 
           secretName: ${cluster_name}-restore-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "Restore client"
           usages:
@@ -479,12 +493,12 @@ You can generate multiple sets of client-side certificates. At least one set of 
         - Add `client auth` in `usages`.
         - `dnsNames` and `ipAddresses` are not required.
         - Add the Issuer created above in the `issuerRef`.
-        - For other attributes, refer to [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1alpha2.CertificateSpec).
+        - For other attributes, refer to [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec).
 
         To generate a client-side certificate for TiDB Lightning, use the following content and set `tlsCluster.tlsClientSecretName` to `${cluster_name}-lightning-client-secret` in TiDB Lightning's `values.yaml` file.
 
         ```yaml
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-lightning-client-secret
@@ -493,7 +507,8 @@ You can generate multiple sets of client-side certificates. At least one set of 
           secretName: ${cluster_name}-lightning-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "Lightning client"
           usages:
@@ -539,7 +554,7 @@ In this step, you create a TiDB cluster and perform the following operations:
           name: ${cluster_name}
           namespace: ${namespace}
         spec:
-          version: v5.3.0
+          version: v5.4.1
           timezone: UTC
           pvReclaimPolicy: Retain
           pd:

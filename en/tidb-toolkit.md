@@ -74,9 +74,9 @@ pd-ctl -u 127.0.0.1:${local_port} -d config show
     tikv-ctl --pd 127.0.0.1:2379 compact-cluster
     ```
 
-* **Local Mode**：In this mode, `tikv-ctl` accesses data files of TiKV, and the running TiKV instances must be stopped. To operate in the local mode, first you need to enter the [Diagnostic Mode](tips.md#use-the-diagnostic-mode) to turn off automatic re-starting for the TiKV instance, stop the TiKV process, and enter the target TiKV Pod and use `tikv-ctl` to perform the operation. The steps are as follows:
+* **Local Mode**：In this mode, `tikv-ctl` accesses data files of TiKV, and the running TiKV instances must be stopped. To operate in the local mode, first you need to enter the [Debug Mode](tips.md#use-the-debug-mode) to turn off automatic re-starting for the TiKV instance, stop the TiKV process, and enter the target TiKV Pod and use `tikv-ctl` to perform the operation. The steps are as follows:
 
-    1. Enter the Diagnostic mode:
+    1. Enter the debug mode:
 
         {{< copyable "shell-regular" >}}
 
@@ -201,12 +201,12 @@ helm search repo pingcap
 
 ```
 NAME                    CHART VERSION   APP VERSION     DESCRIPTION
-pingcap/tidb-backup     v1.2.5                  A Helm chart for TiDB Backup or Restore
-pingcap/tidb-cluster    v1.2.5                  A Helm chart for TiDB Cluster
-pingcap/tidb-drainer    v1.2.5                  A Helm chart for TiDB Binlog drainer.
-pingcap/tidb-lightning  v1.2.5                  A Helm chart for TiDB Lightning
-pingcap/tidb-operator   v1.2.5  v1.2.5  tidb-operator Helm chart for Kubernetes
-pingcap/tikv-importer   v1.2.5                  A Helm chart for TiKV Importer
+pingcap/tidb-backup     v1.3.3                  A Helm chart for TiDB Backup or Restore
+pingcap/tidb-cluster    v1.3.3                  A Helm chart for TiDB Cluster
+pingcap/tidb-drainer    v1.3.3                  A Helm chart for TiDB Binlog drainer.
+pingcap/tidb-lightning  v1.3.3                  A Helm chart for TiDB Lightning
+pingcap/tidb-operator   v1.3.3  v1.3.3  tidb-operator Helm chart for Kubernetes
+pingcap/tikv-importer   v1.3.3                  A Helm chart for TiKV Importer
 ```
 
 When a new version of chart has been released, you can use `helm repo update` to update the repository cached locally:
@@ -268,9 +268,9 @@ Use the following command to download the chart file required for cluster instal
 {{< copyable "shell-regular" >}}
 
 ```shell
-wget http://charts.pingcap.org/tidb-operator-v1.2.5.tgz
-wget http://charts.pingcap.org/tidb-drainer-v1.2.5.tgz
-wget http://charts.pingcap.org/tidb-lightning-v1.2.5.tgz
+wget http://charts.pingcap.org/tidb-operator-v1.3.3.tgz
+wget http://charts.pingcap.org/tidb-drainer-v1.3.3.tgz
+wget http://charts.pingcap.org/tidb-lightning-v1.3.3.tgz
 ```
 
 Copy these chart files to the server and decompress them. You can use these charts to install the corresponding components by running the `helm install` command. Take `tidb-operator` as an example:
@@ -278,7 +278,7 @@ Copy these chart files to the server and decompress them. You can use these char
 {{< copyable "shell-regular" >}}
 
 ```shell
-tar zxvf tidb-operator.v1.2.5.tgz
+tar zxvf tidb-operator.v1.3.3.tgz
 helm install ${release_name} ./tidb-operator --namespace=${namespace}
 ```
 

@@ -41,17 +41,19 @@ Usually, components in a cluster are in the same version. It is recommended to c
 
 Here are the formats of the parameters:
 
-- `spec.version`: the format is `imageTag`, such as `v5.3.0`
+- `spec.version`: the format is `imageTag`, such as `v5.4.1`
 
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`: the format is `imageName`, such as `pingcap/tidb`
 
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`: the format is `imageTag`, such as `v5.3.0`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`: the format is `imageTag`, such as `v5.4.1`
 
 ### Recommended configuration
 
 #### configUpdateStrategy
 
-It is recommended that you configure `spec.configUpdateStrategy: RollingUpdate` to enable automatic update of configurations. This way, every time the configuration is updated, all components are rolling updated automatically, and the modified configuration is applied to the cluster.
+The default value of the `spec.configUpdateStrategy` field is `InPlace`, which means that when you modify `config` of a component, you need to manually trigger a rolling update to apply the new configurations to the cluster.
+
+It is recommended that you configure `spec.configUpdateStrategy: RollingUpdate` to enable automatic update of configurations. In this way, every time the `config` of a component is updated, TiDB Operator automatically triggers a rolling update for the component and applies the modified configuration to the cluster.
 
 #### enableDynamicConfiguration
 
@@ -90,11 +92,15 @@ You can configure the `storageVolumes` field for each component to describe mult
 The meanings of the related fields are as follows:
 
 - `storageVolume.name`: The name of the PV.
-- `storageVolume.storageClassName`: The StorageClass that the PV uses. If not configured, `spec.pd/tidb/tikv.storageClassName` will be used.
+- `storageVolume.storageClassName`: The StorageClass that the PV uses. If not configured, `spec.pd/tidb/tikv/ticdc.storageClassName` will be used.
 - `storageVolume.storageSize`: The storage size of the requested PV.
 - `storageVolume.mountPath`: The path of the container to mount the PV to.
 
 For example:
+
+<SimpleTab>
+
+<div label="TiKV">
 
 {{< copyable "" >}}
 
@@ -114,6 +120,75 @@ For example:
       storageSize: "2Gi"
       mountPath: "/data_sbj/titan/data"
 ```
+
+</div>
+
+<div label="TiDB">
+
+{{< copyable "" >}}
+
+```yaml
+  tidb:
+    config: |
+      path = "/tidb/data"
+      [log.file]
+        filename = "/tidb/log/tidb.log"
+    storageVolumes:
+    - name: data
+      storageSize: "2Gi"
+      mountPath: "/tidb/data"
+    - name: log
+      storageSize: "2Gi"
+      mountPath: "/tidb/log"
+```
+
+</div>
+
+<div label="PD">
+
+{{< copyable "" >}}
+
+```yaml
+  pd:
+    config: |
+      data-dir=/pd/data
+      [log.file]
+        filename=/pd/log/pd.log
+    storageVolumes:
+    - name: data
+      storageSize: "10Gi"
+      mountPath: "/pd/data"
+    - name: log
+      storageSize: "10Gi"
+      mountPath: "/pd/log"
+```
+
+</div>
+
+<div label="TiCDC">
+
+{{< copyable "" >}}
+
+```yaml
+  ticdc:
+    ...
+    config:
+      dataDir: /ticdc/data
+      logFile: /ticdc/log/cdc.log
+    storageVolumes:
+    - name: data
+      storageSize: "10Gi"
+      storageClassName: local-storage
+      mountPath: "/ticdc/data"
+    - name: log
+      storageSize: "10Gi"
+      storageClassName: local-storage
+      mountPath: "/ticdc/log"
+```
+
+</div>
+
+</SimpleTab>
 
 > **Note:**
 >
@@ -207,22 +282,6 @@ If you want to enable TiCDC in the cluster, you can add TiCDC spec to the `TiDBC
     ticdc:
       baseImage: pingcap/ticdc
       replicas: 3
-```
-
-#### Deploy Enterprise Edition
-
-To deploy Enterprise Edition of TiDB/PD/TiKV/TiFlash/TiCDC, edit the `db.yaml` file to set `spec.<tidb/pd/tikv/tiflash/ticdc>.baseImage` to the enterprise image (`pingcap/<tidb/pd/tikv/tiflash/ticdc>-enterprise`).
-
-For example:
-
-```yaml
-spec:
-  ...
-  pd:
-    baseImage: pingcap/pd-enterprise
-  ...
-  tikv:
-    baseImage: pingcap/tikv-enterprise
 ```
 
 ### Configure TiDB components
@@ -398,9 +457,9 @@ When Kubernetes deletes the TiDB Pod, it also removes the TiDB node from the ser
 
 ### Configure graceful upgrade for TiKV cluster
 
-During TiKV upgrade, TiDB Operator evicts all Region leaders from TiKV Pod before restarting TiKV Pod. Only after the eviction is completed (which means the number of Region leaders on TiKV Pod drops to 0) or the eviction exceeds the specified timeout (10 minutes by default), TiKV Pod is restarted.
+During TiKV upgrade, TiDB Operator evicts all Region leaders from TiKV Pod before restarting TiKV Pod. Only after the eviction is completed (which means the number of Region leaders on TiKV Pod drops to 0) or the eviction exceeds the specified timeout (1500 minutes by default), TiKV Pod is restarted. If TiKV has fewer than 2 replicas, TiDB Operator forces an upgrade without waiting for the timeout.
 
-If the eviction of Region leaders exceeds the specified timeout, restarting TiKV Pod causes issues such as failures of some requests or more latency. To avoid the issues, you can configure the timeout `spec.tikv.evictLeaderTimeout` (10 minutes by default) to a larger value. For example:
+If the eviction of Region leaders exceeds the specified timeout, restarting TiKV Pod causes issues such as failures of some requests or more latency. To avoid the issues, you can configure the timeout `spec.tikv.evictLeaderTimeout` (1500 minutes by default) to a larger value. For example:
 
 ```
 spec:
@@ -513,7 +572,7 @@ NodePort has two modes:
     >
     > In this mode, the request source IP obtained by the TiDB service is the host IP, not the real client source IP, so access control based on the client source IP is not available in this mode.
 
--`externalTrafficPolicy=Local`: Only the machine that TiDB is running on allocates a NodePort port to access the local TiDB instance.
+- `externalTrafficPolicy=Local`: Only the machine that TiDB is running on allocates a NodePort port to access the local TiDB instance.
 
 #### LoadBalancer
 

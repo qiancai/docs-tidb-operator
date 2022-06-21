@@ -387,7 +387,7 @@ basic-grafana   LoadBalancer   10.100.199.42   20.240.0.8    3000:30761/TCP   12
 
 ## 升级 TiDB 集群
 
-要升级 TiDB 集群，可以通过 `kubectl edit tc basic -n tidb-cluster` 命令修改 `spec.version`。
+要升级 TiDB 集群，可以通过 `kubectl patch tc basic -n tidb-cluster --type merge -p '{"spec":{"version":"${version}"}}'` 命令修改。
 
 升级过程会持续一段时间，您可以通过 `kubectl get pods -n tidb-cluster --watch` 命令持续观察升级进度。
 
@@ -507,22 +507,6 @@ spec:
 最后使用 `kubectl -n tidb-cluster apply -f tidb-cluster.yaml` 更新 TiDB 集群配置。
 
 更多可参考 [API 文档](https://github.com/pingcap/tidb-operator/blob/master/docs/api-references/docs.md)和[集群配置文档](configure-a-tidb-cluster.md)完成 CR 文件配置。
-
-## 使用企业版
-
-部署企业版 TiDB/PD/TiKV/TiFlash/TiCDC 时，只需要将 tidb-cluster.yaml 中 `spec.[tidb|pd|tikv|tiflash|ticdc].baseImage` 配置为企业版镜像，格式为 `pingcap/[tidb|pd|tikv|tiflash|ticdc]-enterprise`。
-
-例如:
-
-``` yaml
-spec:
-  ...
-  pd:
-    baseImage: pingcap/pd-enterprise
-  ...
-  tikv:
-    baseImage: pingcap/tikv-enterprise
-```
 
 ## 使用其他 Azure 磁盘类型
 

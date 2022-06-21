@@ -7,7 +7,7 @@ aliases: ['/docs/tidb-in-kubernetes/dev/deploy-ticdc/']
 
 # Deploy TiCDC in Kubernetes
 
-[TiCDC](https://pingcap.com/docs/stable/ticdc/ticdc-overview/) is a tool for replicating the incremental data of TiDB. This document describes how to deploy TiCDC in Kubernetes using TiDB Operator.
+[TiCDC](https://docs.pingcap.com/tidb/stable/ticdc-overview) is a tool for replicating the incremental data of TiDB. This document describes how to deploy TiCDC in Kubernetes using TiDB Operator.
 
 You can deploy TiCDC when deploying a new TiDB cluster, or add the TiCDC component to an existing TiDB cluster.
 
@@ -38,17 +38,11 @@ To deploy TiCDC when deploying the TiDB cluster, refer to [Deploy TiDB in Genera
         replicas: 3
     ```
 
-    To deploy Enterprise Edition of TiCDC, edit the `db.yaml` file to set `spec.ticdc.baseImage` to the enterprise image (`pingcap/ticdc-enterprise`).
+3. Mount persistent volumes (PVs) for TiCDC。
 
-    For example:
+    TiCDC supports mounting multiple PV. It is recommended that you plan the number of PVs required when deploying TiCDC for the first time. For more information, refer to [Multiple disks mounting](configure-a-tidb-cluster.md#multiple-disks-mounting)。
 
-    ```yaml
-    spec:
-     ticdc:
-       baseImage: pingcap/ticdc-enterprise
-    ```
-
-3. After the deployment, enter a TiCDC Pod by running `kubectl exec`:
+4. After the deployment, enter a TiCDC Pod by running `kubectl exec`:
 
     {{< copyable "shell-regular" >}}
 
@@ -56,7 +50,7 @@ To deploy TiCDC when deploying the TiDB cluster, refer to [Deploy TiDB in Genera
     kubectl exec -it ${pod_name} -n ${namespace} -- sh
     ```
 
-4. [Manage the cluster and data replication tasks](https://pingcap.com/docs/stable/ticdc/manage-ticdc/#use-cdc-cli-to-manage-cluster-status-and-data-replication-task) by using `cdc cli`.
+5. [Manage the cluster and data replication tasks](https://pingcap.com/docs/stable/ticdc/manage-ticdc/#use-cdc-cli-to-manage-cluster-status-and-data-replication-task) by using `cdc cli`.
 
     {{< copyable "shell-regular" >}}
 

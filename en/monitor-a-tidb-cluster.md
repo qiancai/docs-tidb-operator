@@ -26,6 +26,8 @@ The monitoring data is not persisted by default. To persist the monitoring data,
 
 A configuration example is as follows:
 
+{{< copyable "" >}}
+
 ```yaml
 apiVersion: pingcap.com/v1alpha1
 kind: TidbMonitor
@@ -39,20 +41,23 @@ spec:
   storage: 5G
   prometheus:
     baseImage: prom/prometheus
-    version: v2.18.1
+    version: v2.27.1
     service:
       type: NodePort
   grafana:
     baseImage: grafana/grafana
-    version: 6.1.6
+    version: 7.5.11
     service:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v5.3.0
+    version: v5.4.1
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
+  prometheusReloader:
+    baseImage: quay.io/prometheus-operator/prometheus-config-reloader
+    version: v0.49.0
   imagePullPolicy: IfNotPresent
 ```
 
@@ -77,6 +82,7 @@ You can customize the Prometheus configuration by using a customized configurati
 
 1. Create a ConfigMap for your customized configuration, and set the key name of `data` to `prometheus-config`.
 2. Set `spec.prometheus.config.configMapRef.name` and `spec.prometheus.config.configMapRef.namespace` to the name and namespace of the customized ConfigMap respectively.
+3. Check if TidbMonitor has enabled [dynamic configuration](enable-monitor-dynamic-configuration.md). If not, you need to restart TidbMonitor's pod to reload the configuration.
 
 For the complete configuration, refer to the [tidb-operator example](https://github.com/pingcap/tidb-operator/blob/master/examples/monitor-with-externalConfigMap/prometheus/README.md).
 
@@ -131,7 +137,7 @@ You can also set `spec.prometheus.service.type` to `NodePort` or `LoadBalancer`,
 
 ### Set kube-prometheus and AlertManager
 
-Nodes-Info and Pods-Info monitoring dashboards are built into TidbMonitor Grafana by default to view the corresponding monitoring metrics of Kubernetes. 
+Nodes-Info and Pods-Info monitoring dashboards are built into TidbMonitor Grafana by default to view the corresponding monitoring metrics of Kubernetes.
 
 To view these monitoring metrics in TidbMonitor Grafana, take the following steps:
 
@@ -142,6 +148,8 @@ To view these monitoring metrics in TidbMonitor Grafana, take the following step
 2. Set the `TidbMonitor.spec.kubePrometheusURL` to obtain Kubernetes monitoring data.
 
 Similarly, you can configure TidbMonitor to push the monitoring alert to [AlertManager](https://prometheus.io/docs/alerting/alertmanager/).
+
+{{< copyable "" >}}
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -155,20 +163,23 @@ spec:
   alertmanagerURL: alertmanager-main.monitoring:9093
   prometheus:
     baseImage: prom/prometheus
-    version: v2.18.1
+    version: v2.27.1
     service:
       type: NodePort
   grafana:
     baseImage: grafana/grafana
-    version: 6.1.6
+    version: 7.5.11
     service:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v5.3.0
+    version: v5.4.1
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
+  prometheusReloader:
+    baseImage: quay.io/prometheus-operator/prometheus-config-reloader
+    version: v0.49.0
   imagePullPolicy: IfNotPresent
 ```
 
@@ -190,6 +201,8 @@ Currently, TidbMonitor provides a method to expose the Prometheus/Grafana servic
 
 The following example shows how to enable Prometheus and Grafana in TidbMonitor:
 
+{{< copyable "" >}}
+
 ```yaml
 apiVersion: pingcap.com/v1alpha1
 kind: TidbMonitor
@@ -201,7 +214,7 @@ spec:
   persistent: false
   prometheus:
     baseImage: prom/prometheus
-    version: v2.18.1
+    version: v2.27.1
     ingress:
       hosts:
       - example.com
@@ -209,7 +222,7 @@ spec:
         foo: "bar"
   grafana:
     baseImage: grafana/grafana
-    version: 6.1.6
+    version: 7.5.11
     service:
       type: ClusterIP
     ingress:
@@ -219,16 +232,21 @@ spec:
         foo: "bar"
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v5.3.0
+    version: v5.4.1
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
+  prometheusReloader:
+    baseImage: quay.io/prometheus-operator/prometheus-config-reloader
+    version: v0.49.0
   imagePullPolicy: IfNotPresent
 ```
 
-To modify the setting of Ingress Annotations, configure `spec.prometheus.ingress.annotations` and `spec.grafana.ingress.annotations`. If you use the default Nginx Ingress, see [Nginx Ingress Controller Annotation](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/) for details.
+To modify the setting of Ingress Annotations, configure `spec.prometheus.ingress.annotations` and `spec.grafana.ingress.annotations`. If you use the default NGINX Ingress, see [NGINX Ingress Controller Annotation](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/) for details.
 
 The TidbMonitor Ingress setting also supports TLS. The following example shows how to configure TLS for Ingress. See [Ingress TLS](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls) for details.
+
+{{< copyable "" >}}
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -241,7 +259,7 @@ spec:
   persistent: false
   prometheus:
     baseImage: prom/prometheus
-    version: v2.18.1
+    version: v2.27.1
     ingress:
       hosts:
       - example.com
@@ -251,15 +269,18 @@ spec:
         secretName: testsecret-tls
   grafana:
     baseImage: grafana/grafana
-    version: 6.1.6
+    version: 7.5.11
     service:
       type: ClusterIP
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v5.3.0
+    version: v5.4.1
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
+  prometheusReloader:
+    baseImage: quay.io/prometheus-operator/prometheus-config-reloader
+    version: v0.49.0
   imagePullPolicy: IfNotPresent
 ```
 
@@ -308,6 +329,8 @@ For the clusters to be monitored, regardless of whether `TLS` is enabled or not,
 
 A configuration example is as follows:
 
+{{< copyable "" >}}
+
 ```yaml
 apiVersion: pingcap.com/v1alpha1
 kind: TidbMonitor
@@ -323,20 +346,23 @@ spec:
   storage: 5G
   prometheus:
     baseImage: prom/prometheus
-    version: v2.18.1
+    version: v2.27.1
     service:
       type: NodePort
   grafana:
     baseImage: grafana/grafana
-    version: 6.7.6
+    version: 7.5.11
     service:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v5.3.0
+    version: v5.4.1
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
+  prometheusReloader:
+    baseImage: quay.io/prometheus-operator/prometheus-config-reloader
+    version: v0.49.0
   imagePullPolicy: IfNotPresent
 ```
 
@@ -346,8 +372,8 @@ For a complete configuration example, refer to [Example](https://github.com/ping
 
 If the `tidb-monitor-initializer` image is earlier than v4.0.14 or v5.0.3, to monitor multiple clusters, you can take the following steps in each Grafana Dashboard:
 
-1. On Grafana Dashboard, click **Dashboard settings** to open the **Settings** panel. 
-2. On the **Settings** panel, select the **tidb_cluster** variable from **Variables**, and then set the **Hide** property of the **tidb_cluster** variable to the null option in the drop-down list. 
+1. On Grafana Dashboard, click **Dashboard settings** to open the **Settings** panel.
+2. On the **Settings** panel, select the **tidb_cluster** variable from **Variables**, and then set the **Hide** property of the **tidb_cluster** variable to the null option in the drop-down list.
 3. Get back to the current Grafana Dashboard (changes to the **Hide** property cannot be saved currently), and you can see the drop-down list for cluster selection. The cluster name in the drop-down list is in the `${namespace}-${name}` format.
 
 If you need to save changes to the Grafana Dashboard, Grafana must be `6.5` or later, and TiDB Operator must be v1.2.0-rc.2 or later.
