@@ -44,15 +44,17 @@ aliases:
 
 相关参数的格式如下：
 
-- `spec.version`，格式为 `imageTag`，例如 `v5.3.0`
+- `spec.version`，格式为 `imageTag`，例如 `v6.1.0`
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`，格式为 `imageName`，例如 `pingcap/tidb`
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v5.3.0`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v6.1.0`
 
 ### 推荐配置
 
 #### configUpdateStrategy
 
-建议设置 `spec.configUpdateStrategy: RollingUpdate`，开启配置自动更新特性，在每次配置更新时，自动对组件执行滚动更新，将修改后的配置应用到集群中。
+`spec.configUpdateStrategy` 字段默认值为 `InPlace`，表示当你修改某个组件的 `config` 后，需要手动触发滚动更新后才会应用新的配置。
+
+建议设置 `spec.configUpdateStrategy: RollingUpdate`，开启配置自动更新特性，在某个组件的 `config` 更新时，自动对组件执行滚动更新，将修改后的配置应用到集群中。
 
 #### enableDynamicConfiguration
 
@@ -93,11 +95,17 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
 相关字段的含义如下：
 
 - `storageVolume.name`：PV 的名称。
-- `storageVolume.storageClassName`：PV 使用哪一个 StorageClass。如果不配置，会使用 spec.pd/tidb/tikv.storageClassName。
+- `storageVolume.storageClassName`：PV 使用哪一个 StorageClass。如果不配置，会使用 spec.pd/tidb/tikv/ticdc.storageClassName。
 - `storageVolume.storageSize`：申请 PV 存储容量的大小。
 - `storageVolume.mountPath`：将 PV 挂载到容器的哪个目录。
 
 例子:
+
+<SimpleTab>
+
+<div label="TiKV">
+
+为 TiKV 挂载多块 PV：
 
 {{< copyable "" >}}
 
@@ -117,6 +125,81 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
       storageSize: "2Gi"
       mountPath: "/data_sbj/titan/data"
 ```
+
+</div>
+
+<div label="TiDB">
+
+为 TiDB 挂载多块 PV：
+
+{{< copyable "" >}}
+
+```yaml
+  tidb:
+    config: |
+      path = "/tidb/data"
+      [log.file]
+        filename = "/tidb/log/tidb.log"
+    storageVolumes:
+    - name: data
+      storageSize: "2Gi"
+      mountPath: "/tidb/data"
+    - name: log
+      storageSize: "2Gi"
+      mountPath: "/tidb/log"
+```
+
+</div>
+
+<div label="PD">
+
+为 PD 挂载多块 PV：
+
+{{< copyable "" >}}
+
+```yaml
+  pd:
+    config: |
+      data-dir=/pd/data
+      [log.file]
+        filename=/pd/log/pd.log
+    storageVolumes:
+    - name: data
+      storageSize: "10Gi"
+      mountPath: "/pd/data"
+    - name: log
+      storageSize: "10Gi"
+      mountPath: "/pd/log"
+```
+
+</div>
+
+<div label="TiCDC">
+
+为 TiCDC 挂载多块 PV：
+
+{{< copyable "" >}}
+
+```yaml
+  ticdc:
+    ...
+    config:
+      dataDir: /ticdc/data
+      logFile: /ticdc/log/cdc.log
+    storageVolumes:
+    - name: data
+      storageSize: "10Gi"
+      storageClassName: local-storage
+      mountPath: "/ticdc/data"
+    - name: log
+      storageSize: "10Gi"
+      storageClassName: local-storage
+      mountPath: "/ticdc/log"
+```
+
+</div>
+
+</SimpleTab>
 
 > **注意：**
 > 
@@ -207,20 +290,6 @@ TiFlash 支持挂载多个 PV，如果要为 TiFlash 配置多个 PV，可以在
     replicas: 3
     config:
       logLevel: info
-```
-
-值得注意的是，如果需要部署企业版的 TiDB/PD/TiKV/TiFlash/TiCDC，需要将 db.yaml 中 `spec.<tidb/pd/tikv/tiflash/ticdc>.baseImage` 配置为企业版镜像，格式为 `pingcap/<tidb/pd/tikv/tiflash/ticdc>-enterprise`。
-
-例如:
-
-```yaml
-spec:
-  ...
-  pd:
-    baseImage: pingcap/pd-enterprise
-  ...
-  tikv:
-    baseImage: pingcap/tikv-enterprise
 ```
 
 ### 配置 TiDB 组件
@@ -387,9 +456,9 @@ Kubernetes 在删除 TiDB Pod 的同时，也会把该 TiDB 节点从 Service �
 
 ### 配置 TiKV 平滑升级
 
-TiKV 升级过程中，在重启 TiKV Pod 之前，TiDB Operator 会先驱逐 TiKV Pod 上的所有 Region leader。只有当驱逐完成（即 TiKV Pod 上的 Region leader 个数为 0）或者驱逐超时（默认 10 分钟）后，TiKV Pod 才会重启。
+TiKV 升级过程中，在重启 TiKV Pod 之前，TiDB Operator 会先驱逐 TiKV Pod 上的所有 Region leader。只有当驱逐完成（即 TiKV Pod 上的 Region leader 个数为 0）或者驱逐超时（默认 1500 分钟）后，TiKV Pod 才会重启。如果集群的 TiKV 副本数小于 2，TiDB Operator 不再等待超时，直接触发强制升级。
 
-如果驱逐 Region leader 超时，重启 TiKV Pod 会导致部分请求失败或者延时增加。要避免此问题，你可以将超时时间 `spec.tikv.evictLeaderTimeout`（默认 10 分钟）配置为一个更大的值，例如：
+如果驱逐 Region leader 超时，重启 TiKV Pod 会导致部分请求失败或者延时增加。要避免此问题，你可以将超时时间 `spec.tikv.evictLeaderTimeout`（默认 1500 分钟）配置为一个更大的值，例如：
 
 ```
 spec:
@@ -400,6 +469,23 @@ spec:
 > **警告：**
 > 
 > 如果使用 TiKV 版本小于 4.0.14，或者小于 5.0.3，由于 [TiKV 的 bug](https://github.com/tikv/tikv/pull/10364)，需要将 `spec.tikv.evictLeaderTimeout` 的值设置的尽可能大（推荐大于 `1500m`），以保证 TiKV Pod 上所有的 Region Leader 能在设置的时间内驱逐完毕。
+
+### 配置 TiCDC 平滑升级
+
+> **注意：**
+> 
+> - 如果使用 TiCDC 版本小于 v6.3.0，TiDB Operator 会强制升级 TiCDC，导致同步延时上升。
+> - 该功能自 TiDB Operator v1.3.8 起可用。
+
+TiCDC 升级过程中，在重启 TiCDC Pod 之前，TiDB Operator 会先转移 TiCDC Pod 上的所有的同步负载。只有当转移完成或者转移超时（默认 10 分钟）后，TiCDC Pod 才会重启。如果集群的 TiCDC 实例数小于 2，TiDB Operator 不再等待超时，直接触发强制升级。
+
+如果转移超时，重启 TiCDC Pod 会导致同步延时增加。要避免此问题，你可以将超时时间 `spec.ticdc.gracefulShutdownTimeout`（默认 10 分钟）配置为一个更大的值，例如：
+
+```
+spec:
+  ticdc:
+    gracefulShutdownTimeout: 100m
+```
 
 ### 配置 TiDB 慢查询日志持久卷
 
@@ -456,6 +542,13 @@ spec:
 ### 配置 TiDB 服务
 
 需要配置 `spec.tidb.service`，TiDB Operator 才会为 TiDB 创建 Service。Service 可以根据场景配置不同的类型，比如 `ClusterIP`、`NodePort`、`LoadBalancer` 等。
+
+#### 通用配置
+
+不用类型的 Service 有着部分通用的配置，包括：
+
+* `spec.tidb.service.annotations`：添加到 Service 资源的 Annotation。
+* `spec.tidb.service.labels`：添加到 Service 资源的 Labels。
 
 #### ClusterIP
 
@@ -517,6 +610,61 @@ spec:
 TiDB 是分布式数据库，它的高可用需要做到在任一个物理拓扑节点发生故障时，不仅服务不受影响，还要保证数据也是完整和可用。下面分别具体说明这两种高可用的配置。
 
 ### TiDB 服务高可用
+
+#### 通过 nodeSelector 调度实例
+
+通过各组件配置的 `nodeSelector` 字段，可以约束组件的实例只能调度到特定的节点上。关于 `nodeSelector` 的更多说明，请参阅 [nodeSelector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)。
+
+```yaml
+apiVersion: pingcap.com/v1alpha1
+kind: TidbCluster
+# ...
+spec:
+  pd:
+    nodeSelector:
+      node-role.kubernetes.io/pd: true
+    # ...
+  tikv:
+    nodeSelector:
+      node-role.kubernetes.io/tikv: true
+    # ...
+  tidb:
+    nodeSelector:
+      node-role.kubernetes.io/tidb: true
+    # ...
+```
+
+#### 通过 tolerations 调度实例
+
+通过各组件配置的 `tolerations` 字段，可以允许组件的实例能够调度到带有与之匹配的[污点](https://kubernetes.io/docs/reference/glossary/?all=true#term-taint) (Taint) 的节点上。关于污点与容忍度的更多说明，请参阅 [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)。
+
+```yaml
+apiVersion: pingcap.com/v1alpha1
+kind: TidbCluster
+# ...
+spec:
+  pd:
+    tolerations:
+      - effect: NoSchedule
+        key: dedicated
+        operator: Equal
+        value: pd
+    # ...
+  tikv:
+    tolerations:
+      - effect: NoSchedule
+        key: dedicated
+        operator: Equal
+        value: tikv
+    # ...
+  tidb:
+    tolerations:
+      - effect: NoSchedule
+        key: dedicated
+        operator: Equal
+        value: tidb
+    # ...
+```
 
 #### 通过 affinity 调度实例
 
@@ -637,3 +785,19 @@ topologySpreadConstraints:
     ```
 
     其中 `region`、`zone`、`rack`、`kubernetes.io/hostname` 只是举例，要添加的 Label 名字和数量可以任意定义，只要符合规范且和 `pd.config` 里的 `location-labels` 设置的 Labels 保持一致即可。
+
+* 为 TiDB 节点设置所在的 Node 节点的拓扑信息
+
+    从 TiDB Operator v1.4.0 开始，如果部署的 TiDB 集群版本 >= v6.3.0，TiDB Operator 会自动为 TiDB 获取其所在 Node 节点的拓扑信息，并调用 TiDB server 的对应接口将这些信息设置为 TiDB 的 Labels。这样 TiDB 可以根据这些 Labels 将 [Follower Read](https://docs.pingcap.com/zh/tidb/stable/follower-read) 的请求发送至正确的副本。
+
+    目前，TiDB Operator 会自动为 TiDB server 设置 `pd.config` 的配置中 `location-labels` 对应的 Labels 信息。同时，TiDB 依赖 `zone` Label 支持 Follower Read 的部分功能。TiDB Operator 会依次获取 Label `zone`、`failure-domain.beta.kubernetes.io/zone` 和 `topology.kubernetes.io/zone` 的值作为 `zone` 的值。TiDB Operator 仅设置 TiDB server 所在的节点上包含的 Labels 并忽略其他 Labels。
+
+从 TiDB Operator v1.4.0 开始，在为 TiKV 和 TiDB 节点设置 Labels 时，TiDB Operator 支持为部分 Kubernetes 默认提供的 Labels 设置较短的别名。使用较短的 Labels 别名在部分场景下有助于优化 PD 的调度性能。当使用 TiDB Operator 把 PD 的 `location-labels` 设置为这些别名时，如果对应的节点不包含对应的 Labels，TiDB Operator 自动使用原始 Labels 的值。
+
+目前 TiDB Operator 支持如下短 Label 和原始 Label 的映射：
+
+- `region`：对应 `topology.kubernetes.io/region` 和 `failure-domain.beta.kubernetes.io/region`。
+- `zone`：对应 `topology.kubernetes.io/zone` 和 `failure-domain.beta.kubernetes.io/zone`。
+- `host`：对应 `kubernetes.io/hostname`。
+
+例如，如果 Kubernetes 的各个节点上均没有设置 `region`、`zone` 和 `host` 这些 Labels，将 PD 的 `location-labels` 设置为 `["topology.kubernetes.io/region", "topology.kubernetes.io/zone", "kubernetes.io/hostname"]` 与 `["region", "zone", "host"]` 效果完全相同。
