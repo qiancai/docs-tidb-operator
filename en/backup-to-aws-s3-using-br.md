@@ -10,13 +10,13 @@ aliases: ['/docs/tidb-in-kubernetes/dev/backup-to-aws-s3-using-br/']
 
 This document describes how to back up the data of a TiDB cluster in AWS Kubernetes to the AWS storage.
 
-The backup method described in this document is implemented based on CustomResourceDefinition (CRD) in TiDB Operator. For the underlying implementation, [BR](https://docs.pingcap.com/tidb/stable/backup-and-restore-tool) is used to get the backup data of the TiDB cluster, and then send the data to the AWS storage. BR stands for Backup & Restore, which is a command-line tool for distributed backup and recovery of the TiDB cluster data.
+The backup method described in this document is implemented based on CustomResourceDefinition (CRD) in TiDB Operator. For the underlying implementation, [BR](https://docs.pingcap.com/tidb/stable/backup-and-restore-overview) is used to get the backup data of the TiDB cluster, and then send the data to the AWS storage. BR stands for Backup & Restore, which is a command-line tool for distributed backup and recovery of the TiDB cluster data.
 
 ## Usage scenarios
 
 If you have the following backup needs, you can use BR to make an [ad-hoc backup](#ad-hoc-backup) or [scheduled full backup](#scheduled-full-backup) of the TiDB cluster data to S3-compatible storages.
 
-- To back up a large volume of data at a fast speed
+- To back up a large volume of data (more than 1 TB) at a fast speed
 - To get a direct backup of data as SST files (key-value pairs)
 
 For other backup needs, refer to [Backup and Restore Overview](backup-restore-overview.md) to choose an appropriate backup method.
@@ -208,7 +208,7 @@ Depending on which method you choose to grant permissions to the remote storage 
 
 When configuring `backup-aws-s3.yaml`, note the following:
 
-- Since TiDB Operator v1.1.6, if you want to back up data incrementally, you only need to specify the last backup timestamp `--lastbackupts` in `spec.br.options`. For the limitations of incremental backup, refer to [Use BR to Back up and Restore Data](https://docs.pingcap.com/tidb/stable/backup-and-restore-tool#back-up-incremental-data).
+- Since TiDB Operator v1.1.6, if you want to back up data incrementally, you only need to specify the last backup timestamp `--lastbackupts` in `spec.br.options`. For the limitations of incremental backup, refer to [Use BR to Back up and Restore Data](https://docs.pingcap.com/tidb/stable/br-usage-backup#back-up-incremental-data).
 - You can ignore the `acl`, `endpoint`, `storageClass` configuration items of Amazon S3. For more information about S3-compatible storage configuration, refer to [S3 storage fields](backup-restore-cr.md#s3-storage-fields).
 - Some parameters in `.spec.br` are optional, such as `logLevel` and `statusAddr`. For more information about BR configuration, refer to [BR fields](backup-restore-cr.md#br-fields).
 - For v4.0.8 or a later version, BR can automatically adjust `tikv_gc_life_time`. You do not need to configure `spec.tikvGCLifeTime` and `spec.from` fields in the `Backup` CR.
@@ -404,6 +404,8 @@ Depending on which method you choose to grant permissions to the remote storage,
       schedule: "*/2 * * * *"
       backupTemplate:
         backupType: full
+        # Clean outdated backup data based on maxBackups or maxReservedTime. If not configured, the default policy is Retain
+        # cleanPolicy: Delete
         br:
           cluster: demo1
           clusterNamespace: test1
@@ -456,6 +458,8 @@ Depending on which method you choose to grant permissions to the remote storage,
       schedule: "*/2 * * * *"
       backupTemplate:
         backupType: full
+        # Clean outdated backup data based on maxBackups or maxReservedTime. If not configured, the default policy is Retain
+        # cleanPolicy: Delete
         br:
           cluster: demo1
           sendCredToTikv: false
@@ -506,6 +510,8 @@ Depending on which method you choose to grant permissions to the remote storage,
       serviceAccount: tidb-backup-manager
       backupTemplate:
         backupType: full
+        # Clean outdated backup data based on maxBackups or maxReservedTime. If not configured, the default policy is Retain
+        # cleanPolicy: Delete
         br:
           cluster: demo1
           sendCredToTikv: false

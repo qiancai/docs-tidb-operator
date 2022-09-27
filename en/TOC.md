@@ -32,6 +32,7 @@
   - [Deploy Monitoring and Alerts for TiDB](monitor-a-tidb-cluster.md)
   - [Monitor and Diagnose TiDB Using TiDB Dashboard](access-dashboard.md)
   - [Aggregate Monitoring Data of Multiple TiDB Clusters](aggregate-multiple-cluster-monitor-data.md)
+  - [Monitor a TiDB Cluster across Multiple Kubernetes Clusters](deploy-tidb-monitor-across-multiple-kubernetes.md)
   - [Enable Dynamic Configuration for TidbMonitor](enable-monitor-dynamic-configuration.md)
   - [Enable Shards for TidbMonitor](enable-monitor-shards.md)
 - Migrate
@@ -68,6 +69,9 @@
       - [Restore Data Using BR](restore-from-gcs-using-br.md)
       - [Back Up Data Using Dumpling](backup-to-gcs.md)
       - [Restore Data Using TiDB Lightning](restore-from-gcs.md)
+    - Azure Blob Storage
+      - [Back Up Data Using BR](backup-to-azblob-using-br.md)
+      - [Restore Data Using BR](restore-from-azblob-using-br.md)
     - Persistent Volumes
       - [Back Up Data](backup-to-pv-using-br.md)
       - [Restore Data](restore-from-pv-using-br.md)
@@ -92,6 +96,7 @@
   - [Deployment Failures](deploy-failures.md)
   - [Cluster Exceptions](exceptions.md)
   - [Network Issues](network-issues.md)
+  - [Troubleshoot TiDB Cluster Using PingCAP Clinic](clinic-user-guide.md)
 - [FAQs](faq.md)
 - Reference
   - Architecture
@@ -110,8 +115,16 @@
     - [Configure tidb-drainer Chart](configure-tidb-binlog-drainer.md)
   - [Log Collection](logs-collection.md)
   - [Monitoring and Alert on Kubernetes](monitor-kubernetes.md)
+  - [PingCAP Clinic Diagnostic Data](clinic-data-collection.md)
 - Release Notes
+  - v1.4
+    - [1.4.0-alpha.1](releases/release-1.4.0-alpha.1.md)
   - v1.3
+    - [1.3.8](releases/release-1.3.8.md)
+    - [1.3.7](releases/release-1.3.7.md)
+    - [1.3.6](releases/release-1.3.6.md)
+    - [1.3.5](releases/release-1.3.5.md)
+    - [1.3.4](releases/release-1.3.4.md)
     - [1.3.3](releases/release-1.3.3.md)
     - [1.3.2](releases/release-1.3.2.md)
     - [1.3.1](releases/release-1.3.1.md)

@@ -13,9 +13,9 @@ TiDB Operator 与适用的 TiDB 版本的对应关系如下：
 | TiDB 版本 | 适用的 TiDB Operator 版本 |
 |:---|:---|
 | dev               | dev                 |
-| TiDB >= 5.4       | 1.3                 |
-| 5.1 <= TiDB < 5.4 | 1.3（推荐），1.2      |
-| 3.0 <= TiDB < 5.1 | 1.3（推荐），1.2，1.1 |
+| TiDB >= 5.4       | 1.4，1.3（推荐）          |
+| 5.1 <= TiDB < 5.4 | 1.4，1.3（推荐），1.2      |
+| 3.0 <= TiDB < 5.1 | 1.4，1.3（推荐），1.2，1.1 |
 | 2.1 <= TiDB < v3.0| 1.0（停止维护）       |
 
 ## 使用 TiDB Operator 管理 TiDB 集群
@@ -24,8 +24,8 @@ TiDB Operator 提供了多种方式来部署 Kubernetes 上的 TiDB 集群：
 
 + 测试环境：
 
-    - [kind](get-started.md#使用-kind-创建-kubernetes-集群)
-    - [Minikube](get-started.md#使用-minikube-创建-kubernetes-集群)
+    - [kind](get-started.md#方法一使用-kind-创建-kubernetes-集群)
+    - [Minikube](get-started.md#方法二使用-minikube-创建-kubernetes-集群)
     - [Google Cloud Shell](https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&cloudshell_tutorial=zh/deploy-tidb-from-kubernetes-gke.md)
 
 + 生产环境：

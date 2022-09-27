@@ -1,6 +1,7 @@
 ---
 title: PingCAP Clinic 数据采集说明
 summary: 详细说明 PingCAP Clinic 诊断服务在使用 Operator 部署的 TiDB 集群中能够采集的诊断数据类型、输出文件及采集参数。
+aliases: ['/zh/tidb-in-kubernetes/dev/clinic-data-instruction']
 ---
 
 # PingCAP Clinic 数据采集说明
@@ -9,7 +10,10 @@ summary: 详细说明 PingCAP Clinic 诊断服务在使用 Operator 部署的 Ti
 
 PingCAP Clinic 对使用 TiDB Operator 部署的 TiDB 集群采集的数据**仅**用于集群问题诊断与分析。
 
-Clinic Server 是部署在云端的云服务，位于 PingCAP 内网（中国境内）。如果你把采集的数据上传到了 Clinic Server 供 PingCAP 技术人员远程定位集群问题，这些数据将存储于 PingCAP 设立在 AWS S3 中国区（北京）的服务器。PingCAP 对数据访问权限进行了严格的访问控制，只有经授权的内部技术人员可以访问该数据。
+Clinic Server 是部署在云端的云服务，根据数据存储的位置不同，分为以下两个独立的服务：
+
+- [Clinic Server 中国区](https://clinic.pingcap.com.cn)：如果你把采集的数据上传到了 Clinic Server 中国区，这些数据将存储于 PingCAP 设立在 AWS 中国区（北京）的 S3 服务。PingCAP 对数据访问权限进行了严格的访问控制，只有经授权的内部技术人员可以访问该数据。
+- [Clinic Server 美国区](https://clinic.pingcap.com)：如果你把采集的数据上传到了 Clinic Server 美国区，这些数据将存储于 PingCAP 设立在 AWS 美国区的 S3 服务。PingCAP 对数据访问权限进行了严格的访问控制，只有经授权的内部技术人员可以访问该数据。
 
 ## TiDB 集群信息
 
@@ -22,7 +26,6 @@ Clinic Server 是部署在云端的云服务，位于 PingCAP 内网（中国境
 
 |诊断数据类型 | 输出文件 | PingCAP Clinic 采集参数 |
 | :------ | :------ |:-------- |
-| 性能数据| `cpu_profile.proto`，`mem_heap.proto`，`goroutine.txt`，`mutex.txt` | `collectors:perf`（默认不采集）|
 | 实时配置 | `config.json` | `collectors:config` |
 
 ## TiKV 诊断数据
@@ -30,7 +33,6 @@ Clinic Server 是部署在云端的云服务，位于 PingCAP 内网（中国境
 |诊断数据类型 | 输出文件 | PingCAP Clinic 采集参数 |
 | :------ | :------ |:-------- |
 | 实时配置 | `config.json` | `collectors:config` |
-| 性能数据| `cpu_profile.proto` | `collectors:perf` （默认不采集）|
 
 ## PD 诊断数据
 
@@ -39,14 +41,12 @@ Clinic Server 是部署在云端的云服务，位于 PingCAP 内网（中国境
 | 实时配置 | `config.json` |`collectors:config` |
 | `tiup ctl pd -u http://${pd IP}:${PORT} store` 的输出结果 | `store.json` | `collectors:config` |
 | `tiup ctl pd -u http://${pd IP}:${PORT} config placement-rules show` 的输出结果 | `placement-rule.json` | `collectors:config` |
-| 性能数据| `cpu_profile.proto`，`mem_heap.proto`，`goroutine.txt`，`mutex.txt` | `collectors:perf`（默认不采集）|
 
 ## TiFlash 诊断数据
 
 |诊断数据类型 | 输出文件 | PingCAP Clinic 采集参数 |
 | :------ | :------ |:-------- |
 | 实时配置 | `config.json` |`collectors:config` |
-| 性能数据| `cpu_profile.proto` | `collectors:perf`（默认不采集） |
 
 ## TiCDC 诊断数据
 

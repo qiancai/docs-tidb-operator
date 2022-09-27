@@ -41,9 +41,9 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/configure-a-tidb-cluster/','/zh/tidb-
 
 相关参数的格式如下：
 
-- `spec.version`，格式为 `imageTag`，例如 `v5.4.1`
+- `spec.version`，格式为 `imageTag`，例如 `v6.1.0`
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`，格式为 `imageName`，例如 `pingcap/tidb`
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v5.4.1`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v6.1.0`
 
 ### 推荐配置
 
@@ -102,6 +102,8 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
 
 <div label="TiKV">
 
+为 TiKV 挂载多块 PV：
+
 {{< copyable "" >}}
 
 ```yaml
@@ -125,6 +127,8 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
 
 <div label="TiDB">
 
+为 TiDB 挂载多块 PV：
+
 {{< copyable "" >}}
 
 ```yaml
@@ -146,6 +150,8 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
 
 <div label="PD">
 
+为 PD 挂载多块 PV：
+
 {{< copyable "" >}}
 
 ```yaml
@@ -166,6 +172,8 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
 </div>
 
 <div label="TiCDC">
+
+为 TiCDC 挂载多块 PV：
 
 {{< copyable "" >}}
 
@@ -458,6 +466,23 @@ spec:
 > **警告：**
 >
 > 如果使用 TiKV 版本小于 4.0.14，或者小于 5.0.3，由于 [TiKV 的 bug](https://github.com/tikv/tikv/pull/10364)，需要将 `spec.tikv.evictLeaderTimeout` 的值设置的尽可能大（推荐大于 `1500m`），以保证 TiKV Pod 上所有的 Region Leader 能在设置的时间内驱逐完毕。
+
+### 配置 TiCDC 平滑升级
+
+> **注意：**
+>
+> - 如果使用 TiCDC 版本小于 v6.3.0，TiDB Operator 会强制升级 TiCDC，导致同步延时上升。
+> - 该功能自 TiDB Operator v1.3.8 起可用。
+
+TiCDC 升级过程中，在重启 TiCDC Pod 之前，TiDB Operator 会先转移 TiCDC Pod 上的所有的同步负载。只有当转移完成或者转移超时（默认 10 分钟）后，TiCDC Pod 才会重启。如果集群的 TiCDC 实例数小于 2，TiDB Operator 不再等待超时，直接触发强制升级。
+
+如果转移超时，重启 TiCDC Pod 会导致同步延时增加。要避免此问题，你可以将超时时间 `spec.ticdc.gracefulShutdownTimeout`（默认 10 分钟）配置为一个更大的值，例如：
+
+```
+spec:
+  ticdc:
+    gracefulShutdownTimeout: 100m
+```
 
 ### 配置 TiDB 慢查询日志持久卷
 
@@ -757,3 +782,19 @@ topologySpreadConstraints:
     ```
 
     其中 `region`、`zone`、`rack`、`kubernetes.io/hostname` 只是举例，要添加的 Label 名字和数量可以任意定义，只要符合规范且和 `pd.config` 里的 `location-labels` 设置的 Labels 保持一致即可。
+
+* 为 TiDB 节点设置所在的 Node 节点的拓扑信息
+
+    从 TiDB Operator v1.4.0 开始，如果部署的 TiDB 集群版本 >= v6.3.0，TiDB Operator 会自动为 TiDB 获取其所在 Node 节点的拓扑信息，并调用 TiDB server 的对应接口将这些信息设置为 TiDB 的 Labels。这样 TiDB 可以根据这些 Labels 将 [Follower Read](https://docs.pingcap.com/zh/tidb/stable/follower-read) 的请求发送至正确的副本。
+
+    目前，TiDB Operator 会自动为 TiDB server 设置 `pd.config` 的配置中 `location-labels` 对应的 Labels 信息。同时，TiDB 依赖 `zone` Label 支持 Follower Read 的部分功能。TiDB Operator 会依次获取 Label `zone`、`failure-domain.beta.kubernetes.io/zone` 和 `topology.kubernetes.io/zone` 的值作为 `zone` 的值。TiDB Operator 仅设置 TiDB server 所在的节点上包含的 Labels 并忽略其他 Labels。
+
+从 TiDB Operator v1.4.0 开始，在为 TiKV 和 TiDB 节点设置 Labels 时，TiDB Operator 支持为部分 Kubernetes 默认提供的 Labels 设置较短的别名。使用较短的 Labels 别名在部分场景下有助于优化 PD 的调度性能。当使用 TiDB Operator 把 PD 的 `location-labels` 设置为这些别名时，如果对应的节点不包含对应的 Labels，TiDB Operator 自动使用原始 Labels 的值。
+
+目前 TiDB Operator 支持如下短 Label 和原始 Label 的映射：
+
+- `region`：对应 `topology.kubernetes.io/region` 和 `failure-domain.beta.kubernetes.io/region`。
+- `zone`：对应 `topology.kubernetes.io/zone` 和 `failure-domain.beta.kubernetes.io/zone`。
+- `host`：对应 `kubernetes.io/hostname`。
+
+例如，如果 Kubernetes 的各个节点上均没有设置 `region`、`zone` 和 `host` 这些 Labels，将 PD 的 `location-labels` 设置为 `["topology.kubernetes.io/region", "topology.kubernetes.io/zone", "kubernetes.io/hostname"]` 与 `["region", "zone", "host"]` 效果完全相同。

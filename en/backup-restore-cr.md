@@ -20,10 +20,10 @@ This section introduces the fields in the `Backup` CR.
 
     - When using BR for backup, you can specify the BR version in this field.
         - If the field is not specified or the value is empty, the `pingcap/br:${tikv_version}` image is used for backup by default.
-        - If the BR version is specified in this field, such as `.spec.toolImage: pingcap/br:v5.4.1`, the image of the specified version is used for backup.
+        - If the BR version is specified in this field, such as `.spec.toolImage: pingcap/br:v6.1.0`, the image of the specified version is used for backup.
         - If an image is specified without the version, such as `.spec.toolImage: private/registry/br`, the `private/registry/br:${tikv_version}` image is used for backup.
     - When using Dumpling for backup, you can specify the Dumpling version in this field.
-        - If the Dumpling version is specified in this field, such as `spec.toolImage: pingcap/dumpling:v5.4.1`, the image of the specified version is used for backup.
+        - If the Dumpling version is specified in this field, such as `spec.toolImage: pingcap/dumpling:v6.1.0`, the image of the specified version is used for backup.
         - If the field is not specified, the Dumpling version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](https://github.com/pingcap/tidb-operator/blob/master/images/tidb-backup-manager/Dockerfile) is used for backup by default.
 
 * `.spec.backupType`: the backup type. This field is valid only when you use BR for backup. Currently, the following three types are supported, and this field can be combined with the `.spec.tableFilter` field to configure table filter rules:
@@ -119,7 +119,7 @@ This section introduces the fields in the `Backup` CR.
 * `.spec.br.rateLimit`: the speed limit, in MB/s. If set to `4`, the speed limit is 4 MB/s. The speed limit is not set by default.
 * `.spec.br.checksum`: whether to verify the files after the backup is completed. Defaults to `true`.
 * `.spec.br.timeAgo`: backs up the data before `timeAgo`. If the parameter value is not specified (empty by default), it means backing up the current data. It supports data formats such as `"1.5h"` and `"2h45m"`. See [ParseDuration](https://golang.org/pkg/time/#ParseDuration) for more information.
-* `.spec.br.sendCredToTikv`: whether the BR process passes its AWS or GCP permissions to the TiKV process. Defaults to `true`.
+* `.spec.br.sendCredToTikv`: whether the BR process passes its AWS, GCP, or Azure permissions to the TiKV process. Defaults to `true`.
 * `.spec.br.onLine`: whether to enable the [online restore](https://docs.pingcap.com/tidb/stable/use-br-command-line-tool#online-restore-experimental-feature) feature when restoring data.
 * `.spec.br.options`: the extra arguments that BR supports. This field is supported since TiDB Operator v1.1.6. It accepts an array of strings and can be used to specify the last backup timestamp `--lastbackupts` for incremental backup.
 
@@ -214,6 +214,21 @@ This section introduces the fields in the `Backup` CR.
 
     If the field is not configured, the policy defaults to `private`. For more information on the ACL policies, refer to [GCS documentation](https://cloud.google.com/storage/docs/access-control/lists).
 
+### Azure Blob Storage fields
+
+* `.spec.azblob.secretName`: the name of the secret which stores Azure Blob Storage account credential.
+* `.spec.azblob.container`: the name of the container which stores data.
+* `.spec.azblob.prefix`: if you set this field, the value is used to make up the remote storage path `azure://${.spec.azblob.container}/${.spec.azblob.prefix}/backupName`.
+* `.spec.azblob.accessTier`: the access tier of the uploaded data.
+
+    Azure Blob Storage supports the following access tier options:
+
+    * `Hot`
+    * `Cool`
+    * `Archive`
+
+  If this field is not configured, `Cool` is used by default.
+
 ### Local storage fields
 
 * `.spec.local.prefix`: the storage directory of the persistent volumes. If you set this field, the value is used to make up the storage path of the persistent volume: `local://${.spec.local.volumeMount.mountPath}/${.spec.local.prefix}/`.
@@ -229,8 +244,8 @@ This section introduces the fields in the `Restore` CR.
 * `.spec.metadata.namespace`: the namespace where the `Restore` CR is located.
 * `.spec.toolImage`：the tools image used by `Restore`. TiDB Operator supports this configuration starting from v1.1.9.
 
-    - When using BR for restoring, you can specify the BR version in this field. For example,`spec.toolImage: pingcap/br:v5.4.1`. If not specified, `pingcap/br:${tikv_version}` is used for restoring by default.
-    - When using Lightning for restoring, you can specify the Lightning version in this field. For example, `spec.toolImage: pingcap/lightning:v5.4.1`. If not specified, the Lightning version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](https://github.com/pingcap/tidb-operator/blob/master/images/tidb-backup-manager/Dockerfile) is used for restoring by default.
+    - When using BR for restoring, you can specify the BR version in this field. For example,`spec.toolImage: pingcap/br:v6.1.0`. If not specified, `pingcap/br:${tikv_version}` is used for restoring by default.
+    - When using Lightning for restoring, you can specify the Lightning version in this field. For example, `spec.toolImage: pingcap/lightning:v6.1.0`. If not specified, the Lightning version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](https://github.com/pingcap/tidb-operator/blob/master/images/tidb-backup-manager/Dockerfile) is used for restoring by default.
 
 * `.spec.backupType`: the restore type. This field is valid only when you use BR to restore data. Currently, the following three types are supported, and this field can be combined with the `.spec.tableFilter` field to configure table filter rules:
     * `full`: restore all databases in a TiDB cluster.
@@ -305,6 +320,7 @@ This section introduces the fields in the `Restore` CR.
 * `.spec.br`: BR-related configuration. Refer to [BR fields](#br-fields).
 * `.spec.s3`: S3-related configuration. Refer to [S3 storage fields](#s3-storage-fields).
 * `.spec.gcs`: GCS-related configuration. Refer to [GCS fields](#gcs-fields).
+* `.spec.azblob`：Azure Blob Storage-related configuration. Refer to [Azure Blob Storage fields](#azure-blob-storage-fields).
 * `.spec.local`: persistent volume-related configuration. Refer to [Local storage fields](#local-storage-fields).
 
 ## BackupSchedule CR fields

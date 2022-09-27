@@ -11,7 +11,7 @@ This document describes how to perform backup and restore on the TiDB cluster in
 
 [TiDB Lightning](https://docs.pingcap.com/tidb/stable/get-started-with-tidb-lightning) is a tool used for fast full data import into a TiDB cluster. TiDB Lightning supports Dumpling or CSV format data source. You can use TiDB Lightning to make a logical full data restore or import.
 
-[BR](https://docs.pingcap.com/tidb/stable/backup-and-restore-tool) is a command-line tool for distributed backup and restoration of the TiDB cluster data. Compared with Dumpling and Mydumper, BR is more suitable for huge data volumes. BR only supports TiDB v3.1 and later versions. For incremental backup insensitive to latency, refer to [BR Overview](https://docs.pingcap.com/tidb/stable/backup-and-restore-tool). For real-time incremental backup, refer to [TiCDC](https://docs.pingcap.com/tidb/stable/ticdc-overview).
+[BR](https://docs.pingcap.com/tidb/stable/backup-and-restore-overview) is a command-line tool for distributed backup and restoration of the TiDB cluster data. Compared with Dumpling and Mydumper, BR is more suitable for huge data volumes. BR only supports TiDB v3.1 and later versions. For incremental backup insensitive to latency, refer to [BR Overview](https://docs.pingcap.com/tidb/stable/backup-and-restore-overview). For real-time incremental backup, refer to [TiCDC](https://docs.pingcap.com/tidb/stable/ticdc-overview).
 
 ## Usage scenarios
 
@@ -19,7 +19,7 @@ This document describes how to perform backup and restore on the TiDB cluster in
 
 If you have the following backup needs, you can use BR to make a backup of your TiDB cluster data:
 
-- To back up a large volume of data at a fast speed
+- To back up a large volume of data (more than 1 TB) at a fast speed
 - To get a direct backup of data as SST files (key-value pairs)
 - To perform incremental backup that is insensitive to latency
 
@@ -27,6 +27,7 @@ Refer to the following documents for more information:
 
 - [Back up Data to S3-Compatible Storage Using BR](backup-to-aws-s3-using-br.md)
 - [Back up Data to GCS Using BR](backup-to-gcs-using-br.md)
+- [Back up Data to Azure Blob Storage Using BR](backup-to-azblob-using-br.md)
 - [Back up Data to PV Using BR](backup-to-pv-using-br.md)
 
 If you have the following backup needs, you can use Dumpling to make a backup of the TiDB cluster data:
@@ -46,6 +47,7 @@ To recover the SST files exported by BR to a TiDB cluster, use BR. Refer to the 
 
 - [Restore Data from S3-Compatible Storage Using BR](restore-from-aws-s3-using-br.md)
 - [Restore Data from GCS Using BR](restore-from-gcs-using-br.md)
+- [Restore Data from Azure Blob Storage Using BR](restore-from-azblob-using-br.md)
 - [Restore Data from PV Using BR](restore-from-pv-using-br.md)
 
 To restore data from SQL or CSV files exported by Dumpling or other compatible data sources to a TiDB cluster, use TiDB Lightning. Refer to the following documents for more information:

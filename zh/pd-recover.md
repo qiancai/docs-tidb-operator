@@ -18,7 +18,7 @@ PD Recover 是对 PD 进行灾难性恢复的工具，用于恢复无法正常�
     wget https://download.pingcap.org/tidb-${version}-linux-amd64.tar.gz
     ```
 
-    `${version}` 是 TiDB 集群版本，例如，`v5.4.1`。
+    `${version}` 是 TiDB 集群版本，例如，`v6.1.0`。
 
 2. 解压安装包：
 
@@ -186,7 +186,7 @@ kubectl get tc test -n test -o='go-template={{.status.clusterID}}{{"\n"}}'
 {{< copyable "shell-regular" >}}
 
 ```shell
-kubectl patch tc ${cluster_name} -n ${namespace} --type merge -p '{"spec":{"pd":{"replicas": $replicas}}}
+kubectl patch tc ${cluster_name} -n ${namespace} --type merge -p '{"spec":{"pd":{"replicas": $replicas}}}'
 ```
 
 ### 第 7 步：重启 TiDB 和 TiKV

@@ -28,15 +28,13 @@ Depending on whether you need to enable Transport Layer Security (TLS) for a het
 <SimpleTab>
 <div label="non-TLS">
 
-### Deploy a heterogeneous cluster
-
 To deploy a heterogeneous cluster, do the following:
 
 1. Create a cluster configuration file for the heterogeneous cluster.
 
     For example, save the following configuration as the `cluster.yaml` file. Replace `${heterogeneous_cluster_name}` with the desired name of your heterogeneous cluster, and replace `${origin_cluster_name}` with the name of the existing cluster.
 
-    > **Note**:
+    > **Note:**
     >
     > Comparing with the the configuration file of a normal TiDB cluster, the only difference in the configuration file of a heterogeneous TiDB cluster is that you need to additionally specify the `spec.cluster.name` field as the name of an existing TiDB cluster. According to this field, TiDB Operator adds the heterogeneous cluster to the existing TiDB cluster.
 
@@ -49,7 +47,7 @@ To deploy a heterogeneous cluster, do the following:
       name: ${heterogeneous_cluster_name}
     spec:
       configUpdateStrategy: RollingUpdate
-      version: v5.4.1
+      version: v6.1.0
       timezone: UTC
       pvReclaimPolicy: Delete
       discovery: {}
@@ -101,8 +99,6 @@ To deploy a heterogeneous cluster, do the following:
 
 <div label="TLS">
 
-### Deploy a TLS-enabled heterogeneous cluster
-
 To enable TLS for a heterogeneous cluster, you need to explicitly declare the TLS configuration, issue the certificates using the same certification authority (CA) as the target cluster and create new secrets with the certificates.
 
 If you want to issue the certificate using `cert-manager`, choose the same `Issuer` as that of the target cluster to create your `Certificate`.
@@ -118,7 +114,7 @@ After creating certificates, take the following steps to deploy a TLS-enabled he
 
     For example, save the following configuration as the `cluster.yaml` file. Replace `${heterogeneous_cluster_name}` with the desired name of your heterogeneous cluster, and replace `${origin_cluster_name}` with the name of the existing cluster.
 
-    > **Note**:
+    > **Note:**
     >
     > Comparing with the the configuration file of a normal TiDB cluster, the only difference in the configuration file of a heterogeneous TiDB cluster is that you need to additionally specify the `spec.cluster.name` field as the name of an existing TiDB cluster. According to this field, TiDB Operator adds the heterogeneous cluster to the existing TiDB cluster.
 
@@ -131,7 +127,7 @@ After creating certificates, take the following steps to deploy a TLS-enabled he
       tlsCluster:
         enabled: true
       configUpdateStrategy: RollingUpdate
-      version: v5.4.1
+      version: v6.1.0
       timezone: UTC
       pvReclaimPolicy: Delete
       discovery: {}
@@ -220,7 +216,7 @@ If you need to deploy a monitoring component for a heterogeneous cluster, take t
         version: 7.5.11
     initializer:
         baseImage: pingcap/tidb-monitor-initializer
-        version: v5.4.1
+        version: v6.1.0
     reloader:
         baseImage: pingcap/tidb-monitor-reloader
         version: v1.0.1

@@ -35,7 +35,6 @@
   - [跨多个 Kubernetes 集群监控 TiDB 集群](deploy-tidb-monitor-across-multiple-kubernetes.md)
   - [开启 TidbMonitor 动态配置](enable-monitor-dynamic-configuration.md)
   - [开启 TidbMonitor 分片功能](enable-monitor-shards.md)
-  - [使用 PingCAP Clinic 诊断服务 (Technical Preview)](clinic-user-guide.md)
 - 数据迁移
   - [导入集群数据](restore-data-using-tidb-lightning.md)
   - 从 MySQL 迁移
@@ -70,6 +69,9 @@
       - [使用 BR 恢复 GCS 上的备份数据](restore-from-gcs-using-br.md)
       - [使用 Dumpling 备份 TiDB 集群数据到 GCS](backup-to-gcs.md)
       - [使用 TiDB Lightning 恢复 GCS 上的备份数据](restore-from-gcs.md)
+    - 使用 Azure Blob Storage
+      - [使用 BR 备份 TiDB 集群数据到 Azblob](backup-to-azblob-using-br.md)
+      - [使用 BR 恢复 Azblob 上的备份数据](restore-from-azblob-using-br.md)
     - 使用持久卷
       - [使用 BR 备份 TiDB 集群数据到持久卷](backup-to-pv-using-br.md)
       - [使用 BR 恢复持久卷上的备份数据](restore-from-pv-using-br.md)
@@ -94,6 +96,7 @@
   - [部署错误](deploy-failures.md)
   - [集群异常](exceptions.md)
   - [网络问题](network-issues.md)
+  - [使用 PingCAP Clinic 诊断 TiDB 集群](clinic-user-guide.md)
 - [常见问题](faq.md)
 - 参考
   - 架构
@@ -112,9 +115,16 @@
     - [tidb-drainer chart 配置](configure-tidb-binlog-drainer.md)
   - [日志收集](logs-collection.md)
   - [Kubernetes 监控与告警](monitor-kubernetes.md)
-  - [PingCAP Clinic 数据采集范围说明](clinic-data-instruction.md)
+  - [PingCAP Clinic 数据采集范围说明](clinic-data-collection.md)
 - 版本发布历史
+  - v1.4
+    - [1.4.0-alpha.1](releases/release-1.4.0-alpha.1.md)
   - v1.3
+    - [1.3.8](releases/release-1.3.8.md)
+    - [1.3.7](releases/release-1.3.7.md)
+    - [1.3.6](releases/release-1.3.6.md)
+    - [1.3.5](releases/release-1.3.5.md)
+    - [1.3.4](releases/release-1.3.4.md)
     - [1.3.3](releases/release-1.3.3.md)
     - [1.3.2](releases/release-1.3.2.md)
     - [1.3.1](releases/release-1.3.1.md)

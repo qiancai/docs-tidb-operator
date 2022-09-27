@@ -29,15 +29,12 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/get-started/','/docs-cn/dev/tidb-in-k
 
 本节介绍了两种创建 Kubernetes 测试集群的方法，可用于测试 TiDB Operator 管理的 TiDB 集群。
 
-- [使用 kind](#使用-kind-创建-kubernetes-集群) 创建在 Docker 中运行的 Kubernetes，这是目前比较通用的部署方式。
-- [使用 minikube](#使用-minikube-创建-kubernetes-集群) 创建在虚拟机中运行的 Kubernetes
+- [使用 kind](#方法一使用-kind-创建-kubernetes-集群) 创建在 Docker 中运行的 Kubernetes，这是目前比较通用的部署方式。
+- [使用 minikube](#方法二使用-minikube-创建-kubernetes-集群) 创建在虚拟机中运行的 Kubernetes
 
 你也可以使用 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&cloudshell_tutorial=zh/deploy-tidb-from-kubernetes-gke.md) 在 Google Cloud Platform 的 Google Kubernetes Engine 中部署 Kubernetes 集群。
 
-<SimpleTab>
-<div label="Kind">
-
-### 使用 kind 创建 Kubernetes 集群
+### 方法一：使用 kind 创建 Kubernetes 集群
 
 目前比较通用的方式是使用 [kind](https://kind.sigs.k8s.io/) 部署本地测试 Kubernetes 集群。kind 适用于使用 Docker 容器作为集群节点运行本地 Kubernetes 集群。请参阅 [Docker Hub](https://hub.docker.com/r/kindest/node/tags) 以查看可用 tags。默认使用当前 kind 支持的最新版本。
 
@@ -97,11 +94,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 Kubernetes 集群部署完成，现在就可以开始部署 TiDB Operator 了！
 
-</div>
-
-<div label="minikube">
-
-### 使用 minikube 创建 Kubernetes 集群
+### 方法二：使用 minikube 创建 Kubernetes 集群
 
 [minikube](https://minikube.sigs.k8s.io/docs/start/) 可以在虚拟机中创建一个 Kubernetes 集群。minikube 可在 macOS, Linux 和 Windows 上运行。
 
@@ -189,9 +182,6 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 Kubernetes 集群部署完成，现在就可以开始部署 TiDB Operator 了！
 
-</div>
-</SimpleTab>
-
 ## 第 2 步：部署 TiDB Operator
 
 部署 TiDB Operator 的过程分为两步：
@@ -271,7 +261,7 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
     {{< copyable "shell-regular" >}}
 
     ```shell
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.3
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8
     ```
 
     如果访问 Docker Hub 网速较慢，可以使用阿里云上的镜像：
@@ -279,9 +269,9 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
     {{< copyable "shell-regular" >}}
 
     ```
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.3 \
-        --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.3.3 \
-        --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.3.3 \
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8 \
+        --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.3.8 \
+        --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.3.8 \
         --set scheduler.kubeSchedulerImageName=registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler
     ```
 
@@ -475,7 +465,7 @@ mysql --comments -h 127.0.0.1 -P 14000 -u root
 ```
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MySQL connection id is 178505
-Server version: 5.7.25-TiDB-v5.4.1 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+Server version: 5.7.25-TiDB-v6.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
 
 Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 
@@ -524,10 +514,10 @@ mysql> select * from information_schema.tikv_region_status where db_name=databas
 ```sql
 mysql> select tidb_version()\G
 *************************** 1. row ***************************
-         tidb_version(): Release Version: v5.4.1
+         tidb_version(): Release Version: v6.1.0
                 Edition: Community
         Git Commit Hash: 4a1b2e9fe5b5afb1068c56de47adb07098d768d6
-             Git Branch: heads/refs/tags/v5.4.1
+             Git Branch: heads/refs/tags/v6.1.0
          UTC Build Time: 2021-11-24 13:32:39
               GoVersion: go1.16.4
            Race Enabled: false
@@ -699,7 +689,7 @@ mysql --comments -h 127.0.0.1 -P 24000 -u root -e 'select tidb_version()\G'
 
 ```
 *************************** 1. row ***************************
-tidb_version(): Release Version: v5.4.1-alpha-445-g778e188fa
+tidb_version(): Release Version: v6.1.0-alpha-445-g778e188fa
 Edition: Community
 Git Commit Hash: 778e188fa7af4f48497ff9e05ca6681bf9a5fa16
 Git Branch: master

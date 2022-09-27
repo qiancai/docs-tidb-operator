@@ -2,17 +2,21 @@ name: ci
 
 on: [pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
 jobs:
 
   check-file-encoding:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '16'
     - name: Add remote
       run: |
         git remote add upstream https://github.com/pingcap/docs-tidb-operator.git
@@ -25,11 +29,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '16'
     - name: Add remote
       run: |
         git remote add upstream https://github.com/pingcap/docs-tidb-operator.git
@@ -42,11 +46,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '16'
     - name: Add remote
       run: |
         git remote add upstream https://github.com/pingcap/docs-tidb-operator.git
@@ -60,33 +64,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '16'
     - name: Verify internal links
       run: ./hack/verify-links.sh
   verify-internal-link-anchors:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '16'
     - name: Verify internal link anchors
       run: ./hack/verify-link-anchors.sh
   check-control-characters:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '16'
     - name: Add remote
       run: |
         git remote add upstream https://github.com/pingcap/docs-tidb-operator.git
@@ -99,11 +103,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '16'
     - name: Add remote
       run: |
         git remote add upstream https://github.com/pingcap/docs-tidb-operator.git
@@ -116,11 +120,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '16'
     - name: Add remote
       run: |
         git remote add upstream https://github.com/pingcap/docs-tidb-operator.git

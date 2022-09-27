@@ -23,21 +23,18 @@ You can follow these steps to deploy TiDB Operator and a TiDB cluster:
 
 You can watch the following video (about 12 minutes) to learn how to get started with TiDB Operator.
 
-<video src="https://tidb-docs.s3.us-east-2.amazonaws.com/ENG+TiDB+Operation+Quick+Start.mp4" width="600px" height="450px" controls="controls" poster="https://tidb-docs.s3.us-east-2.amazonaws.com/thumbnail+-+ENG+TiDB+operator.png"></video>
+<iframe width="600" height="450" src="https://www.youtube.com/embed/llYaXvtlqdE" title="TiDB Operator Quick Start" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Step 1. Create a test Kubernetes cluster
 
 This section describes two ways to create a simple Kubernetes cluster. After creating a Kubernetes cluster, you can use it to test TiDB clusters managed by TiDB Operator. Choose whichever best matches your environment.
 
-- [Use kind](#create-a-kubernetes-cluster-using-kind) to deploy a Kubernetes cluster in Docker. It is a common and recommended way.
-- [Use minikube](#create-a-kubernetes-cluster-using-minikube) to deploy a Kubernetes cluster running locally in a VM.
+- [Use kind](#method-1-create-a-kubernetes-cluster-using-kind) to deploy a Kubernetes cluster in Docker. It is a common and recommended way.
+- [Use minikube](#method-2-create-a-kubernetes-cluster-using-minikube) to deploy a Kubernetes cluster running locally in a VM.
 
 Alternatively, you can deploy a Kubernetes cluster in Google Kubernetes Engine in Google Cloud Platform using the [Google Cloud Shell](https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&cloudshell_tutorial=en/deploy-tidb-from-kubernetes-gke.md).
 
-<SimpleTab>
-<div label="kind">
-
-### Create a Kubernetes cluster using kind
+### Method 1: Create a Kubernetes cluster using kind
 
 This section shows how to deploy a Kubernetes cluster using [kind](https://kind.sigs.k8s.io/).
 
@@ -101,11 +98,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 You are now ready to deploy TiDB Operator.
 
-</div>
-
-<div label="minikube">
-
-### Create a Kubernetes cluster using minikube
+### Method 2: Create a Kubernetes cluster using minikube
 
 You can create a Kubernetes cluster in a VM using [minikube](https://minikube.sigs.k8s.io/docs/start/), which supports macOS, Linux, and Windows.
 
@@ -180,9 +173,6 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 </details>
 
 You are now ready to deploy TiDB Operator.
-
-</div>
-</SimpleTab>
 
 ## Step 2. Deploy TiDB Operator
 
@@ -262,7 +252,7 @@ This section describes how to install TiDB Operator using [Helm 3](https://helm.
     {{< copyable "shell-regular" >}}
 
     ```shell
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.3
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8
     ```
 
     <details>
@@ -489,10 +479,10 @@ APPROXIMATE_KEYS: 0
 ```sql
 mysql> select tidb_version()\G
 *************************** 1. row ***************************
-  tidb_version(): Release Version: v5.4.1
+  tidb_version(): Release Version: v6.1.0
          Edition: Community
  Git Commit Hash: 4a1b2e9fe5b5afb1068c56de47adb07098d768d6
-      Git Branch: heads/refs/tags/v5.4.1
+      Git Branch: heads/refs/tags/v6.1.0
   UTC Build Time: 2021-11-24 13:32:39
        GoVersion: go1.16.4
     Race Enabled: false
@@ -668,7 +658,7 @@ Note that `nightly` is not a fixed version. Running the command above at a diffe
 
 ```
 *************************** 1. row ***************************
-tidb_version(): Release Version: v5.4.1-alpha-445-g778e188fa
+tidb_version(): Release Version: v6.1.0-alpha-445-g778e188fa
 Edition: Community
 Git Commit Hash: 778e188fa7af4f48497ff9e05ca6681bf9a5fa16
 Git Branch: master
