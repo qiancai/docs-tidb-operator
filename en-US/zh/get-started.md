@@ -30,25 +30,26 @@ aliases:
 5. [升级 TiDB 集群](#第-5-步升级-tidb-集群)
 6. [销毁 TiDB 集群和 Kubernetes 集群](#第-6-步销毁-tidb-集群和-kubernetes-集群)
 
+你可以先观看下面视频（时长约 12 分钟）。该视频完整的演示了快速上手的操作流程。
+
+<video src="https://tidb-docs.s3.us-east-2.amazonaws.com/Operator+quick+start+(11+mins).mp4" width="600px" height="450px" controls="controls" poster="https://tidb-docs.s3.us-east-2.amazonaws.com/thumbnail+-+TiDB+operator.png"></video>
+
 ## 第 1 步：创建 Kubernetes 测试集群
 
 本节介绍了两种创建 Kubernetes 测试集群的方法，可用于测试 TiDB Operator 管理的 TiDB 集群。
 
-- [使用 kind](#使用-kind-创建-kubernetes-集群) 创建在 Docker 中运行的 Kubernetes，这是目前比较通用的部署方式。
-- [使用 minikube](#使用-minikube-创建-kubernetes-集群) 创建在虚拟机中运行的 Kubernetes
+- [使用 kind](#方法一使用-kind-创建-kubernetes-集群) 创建在 Docker 中运行的 Kubernetes，这是目前比较通用的部署方式。
+- [使用 minikube](#方法二使用-minikube-创建-kubernetes-集群) 创建在虚拟机中运行的 Kubernetes
 
 你也可以使用 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&cloudshell_tutorial=zh/deploy-tidb-from-kubernetes-gke.md) 在 Google Cloud Platform 的 Google Kubernetes Engine 中部署 Kubernetes 集群。
 
-<SimpleTab>
-<div label="Kind">
-
-### 使用 kind 创建 Kubernetes 集群
+### 方法一：使用 kind 创建 Kubernetes 集群
 
 目前比较通用的方式是使用 [kind](https://kind.sigs.k8s.io/) 部署本地测试 Kubernetes 集群。kind 适用于使用 Docker 容器作为集群节点运行本地 Kubernetes 集群。请参阅 [Docker Hub](https://hub.docker.com/r/kindest/node/tags) 以查看可用 tags。默认使用当前 kind 支持的最新版本。
 
 部署前，请确保满足以下要求：
 
-- [docker](https://docs.docker.com/install/)：版本 >= 17.03
+- [docker](https://docs.docker.com/install/)：版本 >= 18.09
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)：版本 >= 1.12
 - [kind](https://kind.sigs.k8s.io/)：版本 >= 0.8.0
 - 若使用 Linux, [net.ipv4.ip_forward](https://linuxconfig.org/how-to-turn-on-off-ip-forwarding-in-linux) 需要被设置为 `1`
@@ -102,21 +103,13 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 Kubernetes 集群部署完成，现在就可以开始部署 TiDB Operator 了！
 
-</div>
-
-<div label="minikube">
-
-### 使用 minikube 创建 Kubernetes 集群
+### 方法二：使用 minikube 创建 Kubernetes 集群
 
 [minikube](https://minikube.sigs.k8s.io/docs/start/) 可以在虚拟机中创建一个 Kubernetes 集群。minikube 可在 macOS, Linux 和 Windows 上运行。
 
-> **注意：**
->
-> - 尽管 minikube 支持通过 `--vm-driver=none` 选项使用主机 Docker 而不使用虚拟机，但是目前尚未针对 TiDB Operator 做全面的测试，所以 TiDB Operator 可能会无法正常工作。如果你想在不支持虚拟化的系统（例如 VPS）上试用 TiDB Operator，可以考虑使用 kind 创建 Kubernetes 集群。
-
 部署前，请确保满足以下要求：
 
-- [minikube](https://minikube.sigs.k8s.io/docs/start/)：版本 1.0.0 及以上。minikube 需要安装一个兼容的 hypervisor，详情见官方安装教程。
+- [minikube](https://minikube.sigs.k8s.io/docs/start/)：版本 1.0.0 及以上，推荐使用较新版本。minikube 需要安装一个兼容的 hypervisor，详情见官方安装教程。
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/): 版本 >= 1.12
 
 你可以使用 minikube start 直接启动 Kubernetes 集群，中国大陆用户也可以通过 gcr.io mirror 仓库启动 Kubernetes 集群。以下分别对这几种方法进行介绍。
@@ -136,27 +129,22 @@ minikube start
 如果一切运行正常，会看到类似下面的输出，根据操作系统和使用的 hypervisor 会有些许差异。
 
 ```
-😄  minikube v1.10.1 on Darwin 10.15.4
-✨  Automatically selected the hyperkit driver. Other choices: docker, vmwarefusion
-💾  Downloading driver docker-machine-driver-hyperkit:
-    > docker-machine-driver-hyperkit.sha256: 65 B / 65 B [---] 100.00% ? p/s 0s
-    > docker-machine-driver-hyperkit: 10.90 MiB / 10.90 MiB  100.00% 1.76 MiB p
-🔑  The 'hyperkit' driver requires elevated permissions. The following commands will be executed:
-
-    $ sudo chown root:wheel /Users/user/.minikube/bin/docker-machine-driver-hyperkit
-    $ sudo chmod u+s /Users/user/.minikube/bin/docker-machine-driver-hyperkit
-
-💿  Downloading VM boot image ...
-    > minikube-v1.10.0.iso.sha256: 65 B / 65 B [-------------] 100.00% ? p/s 0s
-    > minikube-v1.10.0.iso: 174.99 MiB / 174.99 MiB [] 100.00% 6.63 MiB p/s 27s
+😄  minikube v1.24.0 on Darwin 12.1
+✨  Automatically selected the docker driver. Other choices: hyperkit, virtualbox, ssh
 👍  Starting control plane node minikube in cluster minikube
-💾  Downloading Kubernetes v1.18.2 preload ...
-    > preloaded-images-k8s-v3-v1.18.2-docker-overlay2-amd64.tar.lz4: 525.43 MiB
-🔥  Creating hyperkit VM (CPUs=2, Memory=4000MB, Disk=20000MB) ...
-🐳  Preparing Kubernetes v1.18.2 on Docker 19.03.8 ...
+🚜  Pulling base image ...
+💾  Downloading Kubernetes v1.22.3 preload ...
+    > gcr.io/k8s-minikube/kicbase: 355.78 MiB / 355.78 MiB  100.00% 4.46 MiB p/
+    > preloaded-images-k8s-v13-v1...: 501.73 MiB / 501.73 MiB  100.00% 5.18 MiB
+🔥  Creating docker container (CPUs=2, Memory=1985MB) ...
+🐳  Preparing Kubernetes v1.22.3 on Docker 20.10.8 ...
+    ▪ Generating certificates and keys ...
+    ▪ Booting up control plane ...
+    ▪ Configuring RBAC rules ...
 🔎  Verifying Kubernetes components...
-🌟  Enabled addons: default-storageclass, storage-provisioner
-🏄  Done! kubectl is now configured to use "minikube"
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
 ```
 
 </details>
@@ -203,9 +191,6 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 Kubernetes 集群部署完成，现在就可以开始部署 TiDB Operator 了！
 
-</div>
-</SimpleTab>
-
 ## 第 2 步：部署 TiDB Operator
 
 部署 TiDB Operator 的过程分为两步：
@@ -244,7 +229,7 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
 
 ### 安装 TiDB Operator
 
-使用 [Helm 3](https://helm.sh/docs/intro/install/) 安装 TiDB Operator。
+安装 [Helm 3](https://helm.sh/docs/intro/install/) 并使用 Helm 3 部署 TiDB Operator。
 
 1. 添加 PingCAP 仓库。
 
@@ -283,7 +268,7 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
     {{< copyable "shell-regular" >}}
 
     ```shell
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.2.5
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8
     ```
 
     如果访问 Docker Hub 网速较慢，可以使用阿里云上的镜像：
@@ -291,9 +276,9 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
     {{< copyable "shell-regular" >}}
 
     ```
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.2.5 \
-        --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.2.5 \
-        --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.2.5 \
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8 \
+        --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.3.8 \
+        --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.3.8 \
         --set scheduler.kubeSchedulerImageName=registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler
     ```
 
@@ -463,10 +448,10 @@ basic-tikv-peer          ClusterIP   None             <none>        20160/TCP   
 {{< copyable "shell-regular" >}}
 
 ``` shell
-kubectl port-forward -n tidb-cluster svc/basic-tidb 4000 > pf4000.out &
+kubectl port-forward -n tidb-cluster svc/basic-tidb 14000:4000 > pf14000.out &
 ```
 
-命令会在后台运行，并将输出转发到文件 `pf4000.out`。所以，你可以继续在当前 shell 会话中执行命令。
+如果端口 `14000` 已经被占用，可以更换一个空闲端口。命令会在后台运行，并将输出转发到文件 `pf14000.out`。所以，你可以继续在当前 shell 会话中执行命令。
 
 ### 连接 TiDB 服务
 
@@ -477,7 +462,7 @@ kubectl port-forward -n tidb-cluster svc/basic-tidb 4000 > pf4000.out &
 {{< copyable "shell-regular" >}}
 
 ``` shell
-mysql --comments -h 127.0.0.1 -P 4000 -u root
+mysql --comments -h 127.0.0.1 -P 14000 -u root
 ```
 
 <details>
@@ -486,7 +471,7 @@ mysql --comments -h 127.0.0.1 -P 4000 -u root
 ```
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MySQL connection id is 178505
-Server version: 5.7.25-TiDB-v5.3.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+Server version: 5.7.25-TiDB-v6.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
 
 Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 
@@ -503,6 +488,7 @@ MySQL [(none)]>
 <summary>创建 <code>hello_world</code> 表</summary>
 
 ```sql
+mysql> use test;
 mysql> create table hello_world (id int unsigned not null auto_increment primary key, v varchar(32));
 Query OK, 0 rows affected (0.17 sec)
 
@@ -534,10 +520,10 @@ mysql> select * from information_schema.tikv_region_status where db_name=databas
 ```sql
 mysql> select tidb_version()\G
 *************************** 1. row ***************************
-         tidb_version(): Release Version: v5.3.0
+         tidb_version(): Release Version: v6.1.0
                 Edition: Community
         Git Commit Hash: 4a1b2e9fe5b5afb1068c56de47adb07098d768d6
-             Git Branch: heads/refs/tags/v5.3.0
+             Git Branch: heads/refs/tags/v6.1.0
          UTC Build Time: 2021-11-24 13:32:39
               GoVersion: go1.16.4
            Race Enabled: false
@@ -624,7 +610,15 @@ mysql> select * from information_schema.cluster_info\G
 kubectl port-forward -n tidb-cluster svc/basic-grafana 3000 > pf3000.out &
 ```
 
-Grafana 面板可在 kubectl 所运行的主机上通过 <http://localhost:3000> 访问。默认用户名和密码都是 "admin" 。请注意，如果你是非本机（比如 Docker 容器或远程服务器）上运行 `kubectl port-forward`，将无法在本地浏览器里通过 `localhost:3000` 访问。
+Grafana 面板可在 kubectl 所运行的主机上通过 <http://localhost:3000> 访问。默认用户名和密码都是 "admin" 。
+
+请注意，如果你是非本机（比如 Docker 容器或远程服务器）上运行 `kubectl port-forward`，将无法在本地浏览器里通过 `localhost:3000` 访问，可以通过下面命令监听所有地址：
+
+```bash
+kubectl port-forward --address 0.0.0.0 -n tidb-cluster svc/basic-grafana 3000 > pf3000.out &
+```
+
+然后通过 <http://${远程服务器IP}:3000> 访问 Grafana。
 
 了解更多使用 TiDB Operator 部署 TiDB 集群监控的信息，可以查阅 [TiDB 集群监控与告警](monitor-a-tidb-cluster.md)。
 
@@ -676,20 +670,22 @@ basic-tikv-0                      1/1     Running       0          4m13s
 
 ### 转发 TiDB 服务端口
 
-当所有 Pods 都重启后，将看到版本号已更改。需要注意的是，由于相关 Pods 已被销毁重建，这里需要重新设置端口转发。如果 `kubeclt port-forward` 进程仍然在运行，请结束进程后再转发端口。
+当所有 Pods 都重启后，将看到版本号已更改。需要注意的是，由于相关 Pods 已被销毁重建，这里需要重新设置端口转发。
 
 {{< copyable "shell-regular" >}}
 
 ```
-kubectl port-forward -n tidb-cluster svc/basic-tidb 4000 > pf4000.out &
+kubectl port-forward -n tidb-cluster svc/basic-tidb 24000:4000 > pf24000.out &
 ```
+
+如果端口 `24000` 已经被占用，可以更换一个空闲端口。
 
 ### 检查 TiDB 集群版本
 
 {{< copyable "shell-regular" >}}
 
 ```
-mysql --comments -h 127.0.0.1 -P 4000 -u root -e 'select tidb_version()\G'
+mysql --comments -h 127.0.0.1 -P 24000 -u root -e 'select tidb_version()\G'
 ```
 
 <details>
@@ -699,7 +695,7 @@ mysql --comments -h 127.0.0.1 -P 4000 -u root -e 'select tidb_version()\G'
 
 ```
 *************************** 1. row ***************************
-tidb_version(): Release Version: v5.4.0-alpha-445-g778e188fa
+tidb_version(): Release Version: v6.1.0-alpha-445-g778e188fa
 Edition: Community
 Git Commit Hash: 778e188fa7af4f48497ff9e05ca6681bf9a5fa16
 Git Branch: master
@@ -715,6 +711,16 @@ Check Table Before Drop: false
 ## 第 6 步：销毁 TiDB 集群和 Kubernetes 集群
 
 完成测试后，你可能希望销毁 TiDB 集群和 Kubernetes 集群。
+
+### 停止 `kubectl` 的端口转发
+
+如果你仍在运行正在转发端口的 `kubectl` 进程，请终止它们：
+
+{{< copyable "shell-regular" >}}
+
+```shell
+pgrep -lfa kubectl
+```
 
 ### 销毁 TiDB 集群
 
@@ -759,16 +765,6 @@ kubectl get pv -l app.kubernetes.io/namespace=tidb-cluster,app.kubernetes.io/man
 kubectl delete namespace tidb-cluster
 ```
 
-#### 停止 `kubectl` 的端口转发
-
-如果你仍在运行正在转发端口的 `kubectl` 进程，请终止它们：
-
-{{< copyable "shell-regular" >}}
-
-```shell
-pgrep -lfa kubectl
-```
-
 ### 销毁 Kubernetes 集群
 
 销毁 Kubernetes 集群的方法取决于其创建方式。以下是销毁 Kubernetes 集群的步骤。
@@ -801,7 +797,7 @@ minikube delete
 
 ## 探索更多
 
-如果你想在生产环境部署 ，请参考以下文档：
+如果你想在生产环境部署，请参考以下文档：
 
 在公有云上部署：
 
