@@ -15,7 +15,16 @@ aliases:
     > 
     > 创建的 Secret 对象必须符合上述命名规范，否则将导致 TiDB 集群部署失败。
 
-2. 部署集群，设置 `.spec.tidb.tlsClient.enabled` 属性为 `true`；
+2. 部署集群，设置 `.spec.tidb.tlsClient.enabled` 属性为 `true`：
+
+    * 如需跳过作为 MySQL 客户端的内部组件（如 TidbInitializer、Dashboard、Backup、Restore）的 TLS 认证，你可以给集群对应的 `TidbCluster` 加上 `tidb.tidb.pingcap.com/skip-tls-when-connect-tidb="true"` 的 annotation。
+    * 如需关闭 TiDB 服务端对客户端 CA 证书的认证，你可以设置 `.spec.tidb.tlsClient.disableClientAuthn` 属性为 `true`，即在[配置 TiDB 服务端启用安全连接](https://docs.pingcap.com/zh/tidb/stable/enable-tls-between-clients-and-servers#配置-tidb-服务端启用安全连接) 中不设置 ssl-ca 参数。
+    * 如需跳过作为 MySQL 客户端的内部组件（如 TidbInitializer、Dashboard、Backup、Restore）的 CA 证书认证，你可以设置 `.spec.tidb.tlsClient.skipInternalClientCA` 属性为 `true`。
+
+    > **注意：**
+    > 
+    > 已部署的集群 `.spec.tidb.tlsClient.enabled` 属性从 `false` 改为 `true`，将导致 TiDB Pod 滚动重启。
+
 3. 配置 MySQL 客户端使用加密连接。
 
 其中，颁发证书的方式有多种，本文档提供两种方式，用户也可以根据需要为 TiDB 集群颁发证书，这两种方式分别为：
@@ -216,7 +225,7 @@ aliases:
     然后创建一个 `tidb-server-issuer.yaml` 文件，输入以下内容：
 
     ``` yaml
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Issuer
     metadata:
       name: ${cluster_name}-selfsigned-ca-issuer
@@ -224,7 +233,7 @@ aliases:
     spec:
       selfSigned: {}
     ---
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Certificate
     metadata:
       name: ${cluster_name}-ca
@@ -239,7 +248,7 @@ aliases:
         name: ${cluster_name}-selfsigned-ca-issuer
         kind: Issuer
     ---
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Issuer
     metadata:
       name: ${cluster_name}-tidb-issuer
@@ -270,7 +279,7 @@ aliases:
     首先来创建 Server 端证书，创建一个 `tidb-server-cert.yaml` 文件，并输入以下内容：
 
     ``` yaml
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Certificate
     metadata:
       name: ${cluster_name}-tidb-server-secret
@@ -279,7 +288,8 @@ aliases:
       secretName: ${cluster_name}-tidb-server-secret
       duration: 8760h # 365d
       renewBefore: 360h # 15d
-      organization:
+      subject:
+        organizations:
         - PingCAP
       commonName: "TiDB Server"
       usages:
@@ -321,7 +331,7 @@ aliases:
       - `127.0.0.1`
       - `::1`
     - `issuerRef` 请填写上面创建的 Issuer；
-    - 其他属性请参考 [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1alpha2.CertificateSpec)。
+    - 其他属性请参考 [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec)。
 
     通过执行下面的命令来创建证书：
 
@@ -338,7 +348,7 @@ aliases:
     创建一个 `tidb-client-cert.yaml` 文件，并输入以下内容：
 
     ``` yaml
-    apiVersion: cert-manager.io/v1alpha2
+    apiVersion: cert-manager.io/v1
     kind: Certificate
     metadata:
       name: ${cluster_name}-tidb-client-secret
@@ -347,7 +357,8 @@ aliases:
       secretName: ${cluster_name}-tidb-client-secret
       duration: 8760h # 365d
       renewBefore: 360h # 15d
-      organization:
+      subject:
+        organizations:
         - PingCAP
       commonName: "TiDB Client"
       usages:
@@ -364,7 +375,7 @@ aliases:
     - `usages` 请添加上 `client auth`；
     - `dnsNames` 和 `ipAddresses` 不需要填写；
     - `issuerRef` 请填写上面创建的 Issuer；
-    - 其他属性请参考 [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1alpha2.CertificateSpec)。
+    - 其他属性请参考 [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec)。
 
     通过执行下面的命令来创建证书：
 
@@ -392,7 +403,7 @@ aliases:
     1. 创建一个 `tidb-components-client-cert.yaml` 文件，并输入以下内容：
 
         ``` yaml
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-tidb-initializer-client-secret
@@ -401,7 +412,8 @@ aliases:
           secretName: ${cluster_name}-tidb-initializer-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "TiDB Initializer client"
           usages:
@@ -411,7 +423,7 @@ aliases:
             kind: Issuer
             group: cert-manager.io
         ---
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-pd-dashboard-client-secret
@@ -420,7 +432,8 @@ aliases:
           secretName: ${cluster_name}-pd-dashboard-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "PD Dashboard client"
           usages:
@@ -430,7 +443,7 @@ aliases:
             kind: Issuer
             group: cert-manager.io
         ---
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-backup-client-secret
@@ -439,7 +452,8 @@ aliases:
           secretName: ${cluster_name}-backup-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "Backup client"
           usages:
@@ -449,7 +463,7 @@ aliases:
             kind: Issuer
             group: cert-manager.io
         ---
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-restore-client-secret
@@ -458,7 +472,8 @@ aliases:
           secretName: ${cluster_name}-restore-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "Restore client"
           usages:
@@ -475,12 +490,12 @@ aliases:
         - `usages` 请添加上 `client auth`；
         - `dnsNames` 和 `ipAddresses` 不需要填写；
         - `issuerRef` 请填写上面创建的 Issuer；
-        - 其他属性请参考 [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1alpha2.CertificateSpec)。
+        - 其他属性请参考 [cert-manager API](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec)。
 
         如需要为 TiDB Lignting 组件生成 Client 端证书，则可以使用以下内容并通过在 TiDB Lightning 的 Helm Chart `values.yaml` 中设置 `tlsCluster.tlsClientSecretName` 为 `${cluster_name}-lightning-client-secret`：
 
         ```yaml
-        apiVersion: cert-manager.io/v1alpha2
+        apiVersion: cert-manager.io/v1
         kind: Certificate
         metadata:
           name: ${cluster_name}-lightning-client-secret
@@ -489,7 +504,8 @@ aliases:
           secretName: ${cluster_name}-lightning-client-secret
           duration: 8760h # 365d
           renewBefore: 360h # 15d
-          organization:
+          subject:
+            organizations:
             - PingCAP
           commonName: "Lightning client"
           usages:
@@ -535,7 +551,7 @@ aliases:
          name: ${cluster_name}
          namespace: ${namespace}
         spec:
-         version: v5.3.0
+         version: v6.1.0
          timezone: UTC
          pvReclaimPolicy: Retain
          pd:
