@@ -7,7 +7,7 @@ aliases:
 
 # 在 Kubernetes 上部署 TiCDC
 
-[TiCDC](https://pingcap.com/docs-cn/stable/ticdc/ticdc-overview/) 是一款 TiDB 增量数据同步工具，本文介绍如何使用 TiDB Operator 在 Kubernetes 上部署 TiCDC。
+[TiCDC](https://docs.pingcap.com/zh/tidb/stable/ticdc-overview) 是一款 TiDB 增量数据同步工具，本文介绍如何使用 TiDB Operator 在 Kubernetes 上部署 TiCDC。
 
 ## 前置条件
 
@@ -36,17 +36,11 @@ aliases:
         replicas: 3
     ```
 
-   值得注意的是，如果需要部署企业版的 TiCDC，需要将 db.yaml 中 `spec.ticdc.baseImage` 配置为企业版镜像，格式为 `pingcap/ticdc-enterprise`。
+3. 为 TiCDC 挂载 PV。
 
-   例如:
+    TiCDC 支持挂载多个 PV，建议在第一次部署 TiCDC 时规划好使用几个 PV。相关配置请参阅[多盘挂载](configure-a-tidb-cluster.md#多盘挂载)。
 
-   ```yaml
-   spec:
-     ticdc:
-       baseImage: pingcap/ticdc-enterprise
-   ```
-
-3. 部署完成后，通过 `kubectl exec` 进入任意一个 TiCDC Pod 进行操作。
+4. 部署完成后，通过 `kubectl exec` 进入任意一个 TiCDC Pod 进行操作。
 
     {{< copyable "shell-regular" >}}
 
@@ -54,7 +48,7 @@ aliases:
     kubectl exec -it ${pod_name} -n ${namespace} -- sh
     ```
 
-4. 然后通过 `cdc cli` 进行[管理集群和同步任务](https://pingcap.com/docs-cn/stable/ticdc/manage-ticdc/)。
+5. 然后通过 `cdc cli` 进行[管理集群和同步任务](https://pingcap.com/docs-cn/stable/ticdc/manage-ticdc/)。
 
     {{< copyable "shell-regular" >}}
 
