@@ -43,10 +43,10 @@ kubectl create secret generic s3-secret --from-literal=access_key=xxx --from-lit
     {{< copyable "shell-regular" >}}
 
     ```shell
-    kubectl edit tc demo1 -n test1
+    kubectl patch tc demo1 -n test1 --type merge -p '{"spec":{"tikv":{"annotations":{"iam.amazonaws.com/role":"arn:aws:iam::123456789012:role/user"}}}}'
     ```
 
-    找到 `spec.tikv.annotations`，增加 annotation `iam.amazonaws.com/role: arn:aws:iam::123456789012:role/user`，然后退出编辑，等到 TiKV Pod 重启后，查看 Pod 是否加上了这个 annotation。
+    等到 TiKV Pod 重启后，查看 Pod 是否加上了这个 annotation。
 
 > **注意：**
 > 
@@ -79,7 +79,7 @@ kubectl create secret generic s3-secret --from-literal=access_key=xxx --from-lit
     {{< copyable "shell-regular" >}}
 
     ```shell
-    kubectl edit tc demo1 -n test1
+    kubectl patch tc demo1 -n test1 --type merge -p '{"spec":{"tikv":{"serviceAccount": "tidb-backup-manager"}}}'
     ```
 
     将 `spec.tikv.serviceAccount` 修改为 tidb-backup-manager，等到 TiKV Pod 重启后，查看 Pod 的 `serviceAccountName` 是否有变化。
@@ -99,3 +99,43 @@ kubectl create secret generic s3-secret --from-literal=access_key=xxx --from-lit
 ```shell
 kubectl create secret generic gcs-secret --from-file=credentials=./google-credentials.json -n test1
 ```
+
+## Azure 账号授权
+
+在 Azure 云环境中，不同的类型的 Kubernetes 集群提供了不同的权限授予方式。本文分别介绍以下两种权限授予配置方式。
+
+### 通过访问密钥授权
+
+Azure 的客户端支持读取进程环境变量中的 `AZURE_STORAGE_ACCOUNT` 以及 `AZURE_STORAGE_KEY` 来获取与之相关联的用户或者角色的权限。
+
+创建 `azblob-secret` secret，在以下命令中使用 Azure 账号的访问密钥进行授权。该 secret 存放用于访问 Azure Blob Storage 的凭证。
+
+{{< copyable "shell-regular" >}}
+
+```shell
+kubectl create secret generic azblob-secret --from-literal=AZURE_STORAGE_ACCOUNT=xxx --from-literal=AZURE_STORAGE_KEY=yyy --namespace=test1
+```
+
+### 通过 Azure AD 授权
+
+Azure 的客户端支持读取进程环境变量中的 `AZURE_STORAGE_ACCOUNT`、`AZURE_CLIENT_ID`、`AZURE_TENANT_ID`、`AZURE_CLIENT_SECRET` 来获取与之相关联的用户或者角色的权限。
+
+1. 创建 `azblob-secret-ad` secret，在以下命令中使用 Azure 账号的 AD 进行授权。该 secret 存放用于访问 Azure Blob Storage 的凭证。
+
+    {{< copyable "shell-regular" >}}
+
+    ```shell
+    kubectl create secret generic azblob-secret-ad --from-literal=AZURE_STORAGE_ACCOUNT=xxx --from-literal=AZURE_CLIENT_ID=yyy --from-    literal=AZURE_TENANT_ID=zzz --from-literal=AZURE_CLIENT_SECRET=aaa --namespace=test1
+    ```
+
+2. 绑定 secret 到 TiKV Pod:
+
+    在使用 BR 备份的过程中，TiKV Pod 和 BR Pod 一样需要对 Azure Blob Storage 进行读写操作，所以这里需要给 TiKV Pod 绑定 secret。
+
+     {{< copyable "shell-regular" >}}
+
+    ```shell
+    kubectl patch tc demo1 -n test1 --type merge -p '{"spec":{"tikv":{"envFrom":[{"secretRef":{"name":"azblob-secret-ad"}}]}}}'
+    ```
+
+    等到 TiKV Pod 重启后，查看 Pod 是否加上了这些环境变量。
