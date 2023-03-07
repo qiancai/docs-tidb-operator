@@ -1,11 +1,11 @@
 ---
-title: Deploy DM in Kubernetes
-summary: Learn how to deploy TiDB DM cluster in Kubernetes.
+title: Deploy DM on Kubernetes
+summary: Learn how to deploy TiDB DM cluster on Kubernetes.
 ---
 
-# Deploy DM in Kubernetes
+# Deploy DM on Kubernetes
 
-[TiDB Data Migration](https://docs.pingcap.com/tidb-data-migration/v2.0) (DM) is an integrated data migration task management platform that supports the full data migration and the incremental data replication from MySQL/MariaDB into TiDB. This document describes how to deploy DM in Kubernetes using TiDB Operator and how to migrate MySQL data to TiDB cluster using DM.
+[TiDB Data Migration](https://docs.pingcap.com/tidb-data-migration/v2.0) (DM) is an integrated data migration task management platform that supports the full data migration and the incremental data replication from MySQL/MariaDB into TiDB. This document describes how to deploy DM on Kubernetes using TiDB Operator and how to migrate MySQL data to TiDB cluster using DM.
 
 ## Prerequisites
 
@@ -29,9 +29,9 @@ Usually, components in a cluster are in the same version. It is recommended to c
 
 The formats of the related parameters are as follows:
 
-- `spec.version`: the format is `imageTag`, such as `v6.1.0`.
+- `spec.version`: the format is `imageTag`, such as `v6.5.0`.
 - `spec.<master/worker>.baseImage`: the format is `imageName`, such as `pingcap/dm`.
-- `spec.<master/worker>.version`: the format is `imageTag`, such as `v6.1.0`.
+- `spec.<master/worker>.version`: the format is `imageTag`, such as `v6.5.0`.
 
 TiDB Operator only supports deploying DM 2.0 and later versions.
 
@@ -50,7 +50,7 @@ metadata:
   name: ${dm_cluster_name}
   namespace: ${namespace}
 spec:
-  version: v6.1.0
+  version: v6.5.0
   configUpdateStrategy: RollingUpdate
   pvReclaimPolicy: Retain
   discovery: {}
@@ -141,10 +141,10 @@ kubectl apply -f ${dm_cluster_name}.yaml -n ${namespace}
 
 If the server does not have an external network, you need to download the Docker image used by the DM cluster and upload the image to the server, and then execute `docker load` to install the Docker image on the server:
 
-1. Deploy a DM cluster requires the following Docker image (assuming the version of the DM cluster is v6.1.0):
+1. Deploy a DM cluster requires the following Docker image (assuming the version of the DM cluster is v6.5.0):
 
     ```shell
-    pingcap/dm:v6.1.0
+    pingcap/dm:v6.5.0
     ```
 
 2. To download the image, execute the following command:
@@ -152,8 +152,8 @@ If the server does not have an external network, you need to download the Docker
     {{< copyable "shell-regular" >}}
 
     ```shell
-    docker pull pingcap/dm:v6.1.0
-    docker save -o dm-v6.1.0.tar pingcap/dm:v6.1.0
+    docker pull pingcap/dm:v6.5.0
+    docker save -o dm-v6.5.0.tar pingcap/dm:v6.5.0
     ```
 
 3. Upload the Docker image to the server, and execute `docker load` to install the image on the server:
@@ -161,7 +161,7 @@ If the server does not have an external network, you need to download the Docker
     {{< copyable "shell-regular" >}}
 
     ```shell
-    docker load -i dm-v6.1.0.tar
+    docker load -i dm-v6.5.0.tar
     ```
 
 After deploying the DM cluster, execute the following command to view the Pod status:
@@ -174,7 +174,7 @@ You can use TiDB Operator to deploy and manage multiple DM clusters in a single 
 
 Different clusters can be in the same or different `namespace`, which is based on your actual needs.
 
-## Access the DM cluster in Kubernetes
+## Access the DM cluster on Kubernetes
 
 To access DM-master in the pod within a Kubernetes cluster, use the DM-master service domain name `${cluster_name}-dm-master.${namespace}`.
 
@@ -194,5 +194,5 @@ For more service exposure methods, refer to [Access the TiDB Cluster](access-tid
 
 ## What’s next
 
-- To migrate MySQL data to your TiDB cluster using DM in Kubernetes, see [Migrate MySQL Data to TiDB Cluster Using DM](use-tidb-dm.md).
-- To enable TLS between components of the DM cluster in Kubernetes, see [Enable TLS for DM](enable-tls-for-dm.md).
+- To migrate MySQL data to your TiDB cluster using DM on Kubernetes, see [Migrate MySQL Data to TiDB Cluster Using DM](use-tidb-dm.md).
+- To enable TLS between components of the DM cluster on Kubernetes, see [Enable TLS for DM](enable-tls-for-dm.md).

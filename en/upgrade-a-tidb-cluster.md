@@ -1,20 +1,20 @@
 ---
-title: Upgrade a TiDB Cluster in Kubernetes
-summary: Learn how to upgrade a TiDB cluster in Kubernetes.
+title: Upgrade a TiDB Cluster on Kubernetes
+summary: Learn how to upgrade a TiDB cluster on Kubernetes.
 aliases: ['/docs/tidb-in-kubernetes/dev/upgrade-a-tidb-cluster/']
 ---
 
-# Upgrade a TiDB Cluster in Kubernetes
+# Upgrade a TiDB Cluster on Kubernetes
 
-If you deploy and manage your TiDB clusters in Kubernetes using TiDB Operator, you can upgrade your TiDB clusters using the rolling update feature. Rolling update can limit the impact of upgrade on your application.
+If you deploy and manage your TiDB clusters on Kubernetes using TiDB Operator, you can upgrade your TiDB clusters using the rolling update feature. Rolling update can limit the impact of upgrade on your application.
 
-This document describes how to upgrade a TiDB cluster in Kubernetes using rolling updates.
+This document describes how to upgrade a TiDB cluster on Kubernetes using rolling updates.
 
 ## Rolling update introduction
 
 Kubernetes provides the [rolling update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/) feature to update your application with zero downtime.
 
-When you perform a rolling update, TiDB Operator serially deletes an old Pod and creates the corresponding new Pod in the order of PD, TiKV, and TiDB. After the new Pod runs normally, TiDB Operator proceeds with the next Pod.
+When you perform a rolling update, TiDB Operator serially deletes an old Pod and creates the corresponding new Pod in the order of PD, TiFlash, TiKV, and TiDB. After the new Pod runs normally, TiDB Operator proceeds with the next Pod.
 
 During the rolling update, TiDB Operator automatically completes Leader transfer for PD and TiKV. Under the highly available deployment topology (minimum requirements: PD \* 3, TiKV \* 3, TiDB \* 2), performing a rolling update to PD and TiKV servers does not impact the running application. If your client supports retrying stale connections, performing a rolling update to TiDB servers does not impact application, either.
 
@@ -27,7 +27,7 @@ During the rolling update, TiDB Operator automatically completes Leader transfer
 
 > **Note:**
 >
-> By default, TiDB (starting from v4.0.2) periodically shares usage details with PingCAP to help understand how to improve the product. For details about what is shared and how to disable the sharing, see [Telemetry](https://docs.pingcap.com/tidb/stable/telemetry).
+> By default, TiDB (versions starting from v4.0.2 and released before February 20, 2023) periodically shares usage details with PingCAP to help understand how to improve the product. For details about what is shared and how to disable the sharing, see [Telemetry](https://docs.pingcap.com/tidb/stable/telemetry). Starting from February 20, 2023, the telemetry feature is disabled by default in newly released TiDB versions. See [TiDB Release Timeline](https://docs.pingcap.com/tidb/stable/release-timeline) for details.
 
 1. In `TidbCluster` CR, modify the image configurations of all components of the cluster to be upgraded.
 
@@ -41,7 +41,7 @@ During the rolling update, TiDB Operator automatically completes Leader transfer
 
     The `version` field has following formats:
 
-    - `spec.version`: the format is `imageTag`, such as `v6.1.0`
+    - `spec.version`: the format is `imageTag`, such as `v6.5.0`
     - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`: the format is `imageTag`, such as `v3.1.0`
 
 2. Check the upgrade progress:

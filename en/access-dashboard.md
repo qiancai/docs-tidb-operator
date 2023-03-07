@@ -1,6 +1,6 @@
 ---
 title: Access TiDB Dashboard
-summary: Learn how to access TiDB Dashboard in Kubernetes.
+summary: Learn how to access TiDB Dashboard on Kubernetes.
 aliases: ['/docs/tidb-in-kubernetes/dev/access-dashboard/']
 ---
 
@@ -8,7 +8,7 @@ aliases: ['/docs/tidb-in-kubernetes/dev/access-dashboard/']
 
 TiDB Dashboard is a visualized tool introduced since TiDB v4.0 and is used to monitor and diagnose TiDB clusters. For details, see [TiDB Dashboard](https://docs.pingcap.com/tidb/stable/dashboard-intro).
 
-This document describes how to access TiDB Dashboard in Kubernetes.
+This document describes how to access TiDB Dashboard on Kubernetes.
 
 - In a test environment, you can [access TiDB Dashboard by port forward](#method-1-access-tidb-dashboard-by-port-forward).
 - In a production environment, it is recommended to [access TiDB Dashboard by Ingress](#method-2-access-tidb-dashboard-by-ingress). You can also enable the TLS transfer. See [Use Ingress with TLS](#use-ingress-with-tls) for details.
@@ -20,13 +20,18 @@ This document describes how to access TiDB Dashboard in Kubernetes.
 
 In this document, you can use the Discovery service to access TiDB Dashboard. TiDB Operator starts a Discovery service for each TiDB cluster. The Discovery service can return the corresponding startup parameters for each PD Pod to support the startup of the PD cluster. The Discovery service can also send proxy requests to the TiDB Dashboard.
 
-> **Warning:**
->
-> The TiDB Dashboard is available in the `/dashboard` path of the PD. Other paths outside of this may not have access control.
+## Prerequisites: Determine the TiDB Dashboard service
 
-## Prerequisites
+This section describes how to determine the TiDB Dashboard `service` and `HTTP` path in different deployment methods of TiDB Dashboard. You can fill in the `service` and `HTTP` path obtained in this section in the target configuration file to access TiDB Dashboard.
 
-To access TiDB Dashboard smoothly in Kubernetes, you need to use TiDB Operator v1.1.1 (or later versions) and the TiDB cluster (v4.0.1 or later versions).
+TiDB supports two methods to deploy TiDB Dashboard. You can choose one of the two methods to access TiDB Dashboard:
+
+- Deployed as an independent service. In this deployment method, TiDB Dashboard is an independent StatefulSet and has a dedicated service. The Web server path can be configured through `TidbDashboard.spec.pathPrefix`.
+- Built in PD. The TiDB Dashboard deployed in this method is available in the `/dashboard` path of the PD. Other paths outside of this might not have access control. Note that this deployment method will be removed in future TiDB releases. Therefore, it is recommended to deploy TiDB Dashboard as an independent service.
+
+### Access TiDB Dashboard built in PD
+
+To access TiDB Dashboard built in PD, you need to use TiDB Operator v1.1.1 (or later versions) and the TiDB cluster v4.0.1 (or later versions).
 
 You need to configure the `TidbCluster` object file as follows to enable quick access to TiDB Dashboard:
 
@@ -40,60 +45,46 @@ spec:
     enableDashboardInternalProxy: true
 ```
 
+In this deployment method, the `service`, `port`, and `HTTP` paths of TiDB Dashboard are as follows:
+
+```shell
+export SERVICE_NAME=${cluster_name}-discovery && \
+export PORT=10261 && \
+export HTTP_PATH=/dashboard
+```
+
+### Access independently deployed TiDB Dashboard
+
+To access an independently deployed TiDB Dashboard, you need to use TiDB Operator v1.4.0 (or later versions) and the TiDB cluster v4.0.1 (or later versions).
+
+Before accessing TiDB Dashboard, ensure that you have [deployed an independent TiDB Dashboard](get-started.md#deploy-tidb-dashboard-independently).
+
+In this deployment method, the `service`, `port`, and `HTTP` paths of TiDB Dashboard are as follows (default values):
+
+```shell
+export SERVICE_NAME=${cluster_name}-tidb-dashboard-exposed && \
+export PORT=12333 && \
+export HTTP_PATH=""
+```
+
 ## Method 1. Access TiDB Dashboard by port forward
 
 > **Warning:**
 >
 > This guide shows how to quickly access TiDB Dashboard. Do **NOT** use this method in the production environment. For production environments, refer to [Access TiDB Dashboard by Ingress](#method-2-access-tidb-dashboard-by-ingress).
 
-TiDB Dashboard is built in the PD component in TiDB 4.0 and later versions. You can refer to the following example to quickly deploy a TiDB cluster in Kubernetes.
+TiDB Dashboard is built in the PD component in TiDB 4.0 and later versions. You can refer to the following example to quickly deploy a TiDB cluster on Kubernetes.
 
-1. Deploy the following example `.yaml` file into the Kubernetes cluster by running the `kubectl apply -f` command:
+```shell
+kubectl port-forward svc/${SERVICE_NAME} -n ${namespace} ${PORT}:${PORT}
+```
 
-    ```yaml
-    apiVersion: pingcap.com/v1alpha1
-    kind: TidbCluster
-    metadata:
-      name: basic
-    spec:
-      version: v6.1.0
-      timezone: UTC
-      pvReclaimPolicy: Delete
-      pd:
-        enableDashboardInternalProxy: true
-        baseImage: pingcap/pd
-        maxFailoverCount: 0
-        replicas: 1
-        requests:
-          storage: "10Gi"
-        config: {}
-      tikv:
-        baseImage: pingcap/tikv
-        maxFailoverCount: 0
-        replicas: 1
-        requests:
-          storage: "100Gi"
-        config: {}
-      tidb:
-        baseImage: pingcap/tidb
-        maxFailoverCount: 0
-        replicas: 1
-        service:
-          type: ClusterIP
-        config: {}
-    ```
+In the preceding command:
 
-2. After the cluster is created, expose TiDB Dashboard to the local machine by running the following command:
+- `${namespace}` is `TidbCluster.namespace`.
+- `port-forward` binds to the IP address 127.0.0.1 by default. If you need to use another IP address to access the machine running the `port-forward` command, you can add the `--address` option and specify the IP address to be bound.
 
-    {{< copyable "shell-regular" >}}
-
-    ```shell
-    kubectl port-forward svc/basic-discovery -n ${namespace} 10262:10262
-    ```
-
-    By default, `port-forward` binds to the IP address 127.0.0.1. If you need to use another IP address to access the machine running the `port-forward` command, you can add the `--address` option and specify the IP address to be bound.
-
-3. Visit <http://localhost:10262/dashboard> in your browser to access TiDB Dashboard.
+Visit <http://localhost:${PORT}${HTTP_PATH}> in your browser to access TiDB Dashboard.
 
 ## Method 2. Access TiDB Dashboard by Ingress
 
@@ -125,12 +116,12 @@ The following is an `.yaml` example of accessing TiDB Dashboard using Ingress:
           http:
             paths:
               - backend:
-                  serviceName: ${cluster_name}-discovery
-                  servicePort: 10262
-                path: /dashboard
+                  serviceName: ${SERVICE_NAME}
+                  servicePort: ${PORT}
+                path: ${HTTP_PATH}
     ```
 
-2. After Ingress is deployed, you can access TiDB Dashboard via <http://${host}/dashboard> outside the Kubernetes cluster.
+2. After Ingress is deployed, you can access TiDB Dashboard via <http://${host}${path}> outside the Kubernetes cluster.
 
 ### Use Ingress with TLS
 
@@ -152,9 +143,9 @@ spec:
       http:
         paths:
           - backend:
-              serviceName: ${cluster_name}-discovery
-              servicePort: 10262
-            path: /dashboard
+              serviceName: ${SERVICE_NAME}
+              servicePort: ${PORT}
+            path: ${HTTP_PATH}
 ```
 
 In the above file, `testsecret-tls` contains `tls.crt` and `tls.key` needed for `example.com`.
@@ -173,11 +164,15 @@ data:
 type: kubernetes.io/tls
 ```
 
-After Ingress is deployed, visit <https://{host}/dashboard> to access TiDB Dashboard.
+After Ingress is deployed, visit <https://{host}${path}> to access TiDB Dashboard.
 
 ## Method 3. Use NodePort Service
 
 Because `ingress` can only be accessed with a domain name, it might be difficult to use `ingress` in some scenarios. In this case, to access and use TiDB Dashboard, you can add a `Service` of `NodePort` type.
+
+### Access TiDB Dashboard built in PD
+
+To access TiDB Dashboard built in PD, you need to create a `NodePort` service for PD.
 
 The following is an `.yaml` example using the `Service` of `NodePort` type to access the TiDB Dashboard. To deploy the following `.yaml` file into the Kubernetes cluster, you can run the `kubectl apply -f` command:
 
@@ -203,6 +198,14 @@ spec:
 After deploying the `Service`, you can access TiDB Dashboard via <https://{nodeIP}:{nodePort}/dashboard>. By default, `nodePort` is randomly assigned by Kubernetes. You can also specify an available port in the `.yaml` file.
 
 Note that if there is more than one PD `Pod` in the cluster, you need to set `spec.pd.enableDashboardInternalProxy: true` in the `TidbCluster` CR to ensure normal access to TiDB Dashboard.
+
+### Access independently deployed TiDB Dashboard
+
+> **Note:**
+>
+> When deploying TiDB Dashboard independently, you need to set `TidbDashboard.spec.service.type` to `NodePort`.
+
+After deploying TiDB Dashboard independently, you can get the `nodePort` of `${cluster_name}-tidb-dashboard-exposed` by running the `kubectl get svc` command, and then access TiDB Dashboard via <https://{nodeIP}:{nodePort}>.
 
 ## Enable Continuous Profiling
 
@@ -235,7 +238,7 @@ To enable this feature, you need to deploy TidbNGMonitoring CR using TiDB Operat
       ngMonitoring:
         requests:
           storage: 10Gi
-        version: v6.1.0
+        version: v6.5.0
         # storageClassName: default
         baseImage: pingcap/ng-monitoring
     ```

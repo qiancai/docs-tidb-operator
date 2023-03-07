@@ -1,10 +1,10 @@
 ---
-title: Get Started With TiDB Operator in Kubernetes
-summary: Learn how to quickly deploy a TiDB cluster in Kubernetes using TiDB Operator.
+title: Get Started With TiDB Operator on Kubernetes
+summary: Learn how to quickly deploy a TiDB cluster on Kubernetes using TiDB Operator.
 aliases: ['/docs/tidb-in-kubernetes/dev/get-started/','/docs/dev/tidb-in-kubernetes/deploy-tidb-from-kubernetes-dind/', '/docs/dev/tidb-in-kubernetes/deploy-tidb-from-kubernetes-kind/', '/docs/dev/tidb-in-kubernetes/deploy-tidb-from-kubernetes-minikube/','/docs/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-kind/','/docs/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-minikube/','/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-kind','/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-minikube']
 ---
 
-# Get Started with TiDB Operator in Kubernetes
+# Get Started with TiDB Operator on Kubernetes
 
 This document introduces how to create a simple Kubernetes cluster and use it to deploy a basic test TiDB cluster using TiDB Operator.
 
@@ -32,7 +32,7 @@ This section describes two ways to create a simple Kubernetes cluster. After cre
 - [Use kind](#method-1-create-a-kubernetes-cluster-using-kind) to deploy a Kubernetes cluster in Docker. It is a common and recommended way.
 - [Use minikube](#method-2-create-a-kubernetes-cluster-using-minikube) to deploy a Kubernetes cluster running locally in a VM.
 
-Alternatively, you can deploy a Kubernetes cluster in Google Kubernetes Engine in Google Cloud Platform using the [Google Cloud Shell](https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&cloudshell_tutorial=en/deploy-tidb-from-kubernetes-gke.md).
+Alternatively, you can deploy a Kubernetes cluster on Google Kubernetes Engine on Google Cloud Platform using the [Google Cloud Shell](https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&cloudshell_tutorial=en/deploy-tidb-from-kubernetes-gke.md).
 
 ### Method 1: Create a Kubernetes cluster using kind
 
@@ -252,7 +252,7 @@ This section describes how to install TiDB Operator using [Helm 3](https://helm.
     {{< copyable "shell-regular" >}}
 
     ```shell
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.4.3
     ```
 
     <details>
@@ -319,6 +319,23 @@ tidbcluster.pingcap.com/basic created
 
 If you need to deploy a TiDB cluster on an ARM64 machine, refer to [Deploy a TiDB Cluster on ARM64 Machines](deploy-cluster-on-arm64.md).
 
+### Deploy TiDB Dashboard independently
+
+{{< copyable "shell-regular" >}}
+
+``` shell
+kubectl -n tidb-cluster apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic/tidb-dashboard.yaml
+```
+
+<details>
+<summary>Expected output</summary>
+
+```
+tidbdashboard.pingcap.com/basic created
+```
+
+</details>
+
 ### Deploy TiDB monitoring services
 
 {{< copyable "shell-regular" >}}
@@ -370,7 +387,7 @@ To connect to TiDB, you need a MySQL-compatible client installed on the host whe
 
 ### Forward port 4000
 
-You can connect to TiDB by first forwarding a port from the local host to the TiDB **service** in Kubernetes.
+You can connect to TiDB by first forwarding a port from the local host to the TiDB **service** on Kubernetes.
 
 First, get a list of services in the `tidb-cluster` namespace:
 
@@ -479,10 +496,10 @@ APPROXIMATE_KEYS: 0
 ```sql
 mysql> select tidb_version()\G
 *************************** 1. row ***************************
-  tidb_version(): Release Version: v6.1.0
+  tidb_version(): Release Version: v6.5.0
          Edition: Community
  Git Commit Hash: 4a1b2e9fe5b5afb1068c56de47adb07098d768d6
-      Git Branch: heads/refs/tags/v6.1.0
+      Git Branch: heads/refs/tags/v6.5.0
   UTC Build Time: 2021-11-24 13:32:39
        GoVersion: go1.16.4
     Race Enabled: false
@@ -581,6 +598,26 @@ Then access Grafana through <http://${remote-server-IP}:3000>.
 
 For more information about monitoring the TiDB cluster in TiDB Operator, refer to [Deploy Monitoring and Alerts for a TiDB Cluster](monitor-a-tidb-cluster.md).
 
+### Access TiDB Dashboard web UI
+
+You can forward the port for TiDB Dashboard to access TiDB Dashboard web UI locally:
+
+{{< copyable "shell-regular" >}}
+
+``` shell
+kubectl port-forward -n tidb-cluster svc/basic-tidb-dashboard-exposed 12333 > pf12333.out &
+```
+
+You can access the panel of TiDB Dashboard at <http://localhost:12333> on the host where you run `kubectl`.
+
+Note that if you run `kubectl port-forward` in a Docker container or on a remote host instead of your local host, you cannot access TiDB Dashboard using `localhost` from your local browser. In this case, you can run the following command to listen on all addresses.
+
+```bash
+kubectl port-forward --address 0.0.0.0 -n tidb-cluster svc/basic-tidb-dashboard-exposed 12333 > pf12333.out &
+```
+
+Then access TiDB Dashboard through <http://${remote-server-IP}:12333>.
+
 ## Step 5. Upgrade a TiDB cluster
 
 TiDB Operator also makes it easy to perform a rolling upgrade of the TiDB cluster. This section describes how to upgrade your TiDB cluster to the "nightly" release.
@@ -658,7 +695,7 @@ Note that `nightly` is not a fixed version. Running the command above at a diffe
 
 ```
 *************************** 1. row ***************************
-tidb_version(): Release Version: v6.1.0-alpha-445-g778e188fa
+tidb_version(): Release Version: v6.5.0-alpha-445-g778e188fa
 Edition: Community
 Git Commit Hash: 778e188fa7af4f48497ff9e05ca6681bf9a5fa16
 Git Branch: master
@@ -771,7 +808,7 @@ On public clouds:
 
 In a self-managed Kubernetes cluster:
 
-- Familiarize yourself with [Prerequisites for TiDB in Kubernetes](prerequisites.md)
+- Familiarize yourself with [Prerequisites for TiDB on Kubernetes](prerequisites.md)
 - [Configure the local PV](configure-storage-class.md#local-pv-configuration) for your Kubernetes cluster to achieve high performance for TiKV
-- [Deploy TiDB Operator in Kubernetes](deploy-tidb-operator.md)
-- [Deploy TiDB in General Kubernetes](deploy-on-general-kubernetes.md)
+- [Deploy TiDB Operator on Kubernetes](deploy-tidb-operator.md)
+- [Deploy TiDB on General Kubernetes](deploy-on-general-kubernetes.md)

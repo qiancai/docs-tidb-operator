@@ -40,6 +40,29 @@ If you associate the user's [IAM](https://aws.amazon.com/cn/iam/) role with the 
 
     Because the `Backup` CR needs to access the Amazon S3 storage, the IAM role is granted the `AmazonS3FullAccess` permission.
 
+    When backing up a TiDB cluster using EBS volume snapshots, besides the `AmazonS3FullAccess` permission, the following permissions are also required:
+
+    ```json
+            {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AttachVolume",
+                "ec2:CreateSnapshot",
+                "ec2:CreateTags",
+                "ec2:CreateVolume",
+                "ec2:DeleteSnapshot",
+                "ec2:DeleteTags",
+                "ec2:DeleteVolume",
+                "ec2:DescribeInstances",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeTags",
+                "ec2:DescribeVolumes",
+                "ec2:DetachVolume"
+            ],
+            "Resource": "*"
+        }
+    ```
+
 2. Associate IAM with the TiKV Pod:
 
     When you use BR to back up TiDB data, the TiKV Pod also needs to perform read and write operations on S3-compatible storage as the BR Pod does. Therefore, you need to add annotations to the TiKV Pod to associate it with the IAM role.
@@ -68,15 +91,48 @@ When you use this method to grant permissions, you can [create the EKS cluster](
 
 2. Create the IAM role:
 
-    [Create an IAM role](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html) and grant the `AmazonS3FullAccess` permissions to the role. Edit the role's `Trust relationships`.
+    [Create an IAM role](https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html) and grant the `AmazonS3FullAccess` permissions to the role. Edit the role's `Trust relationships` to grant tidb-backup-manager the access to this IAM role.
 
-3. Associate IAM with the `ServiceAccount` resources.
+     When backing up a TiDB cluster using EBS volume snapshots, besides the `AmazonS3FullAccess` permission, the following permissions are also required:
+
+    ```json
+            {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AttachVolume",
+                "ec2:CreateSnapshot",
+                "ec2:CreateTags",
+                "ec2:CreateVolume",
+                "ec2:DeleteSnapshot",
+                "ec2:DeleteTags",
+                "ec2:DeleteVolume",
+                "ec2:DescribeInstances",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeTags",
+                "ec2:DescribeVolumes",
+                "ec2:DetachVolume"
+            ],
+            "Resource": "*"
+        }
+    ```
+
+    At the same time, edit the role's `Trust relationships` to grant tidb-controller-manager the access to this IAM role.
+
+3. Associate the IAM role with the `ServiceAccount` resources.
 
     {{< copyable "shell-regular" >}}
 
     ```shell
-    kubectl annotate sa tidb-backup-manager -n eks.amazonaws.com/role-arn=arn:aws:iam::123456789012:role/user --namespace=test1
+    kubectl annotate sa tidb-backup-manager eks.amazonaws.com/role-arn=arn:aws:iam::123456789012:role/user --namespace=test1
     ```
+
+    When backing up or restoring a TiDB cluster using EBS volume snapshots, you need to associate the IAM role with the `ServiceAccount` resources of tidb-controller-manager.
+
+     ```shell
+     kubectl annotate sa tidb-controller-manager eks.amazonaws.com/role-arn=arn:aws:iam::123456789012:role/user --namespace=tidb-admin
+     ```
+
+     Restart the tidb-controller-manager Pod of TiDB Operator to make the configured `ServiceAccount` take effect.
 
 4. Associate the `ServiceAccount` with the TiKV Pod:
 

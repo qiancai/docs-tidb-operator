@@ -109,7 +109,7 @@ After the `TidbCluster` CRD is created, install TiDB Operator in your Kubernetes
 
 ```shell
 kubectl create namespace tidb-admin
-helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8
+helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.4.3
 kubectl get po -n tidb-admin -l app.kubernetes.io/name=tidb-operator
 ```
 
@@ -184,7 +184,7 @@ Congratulations, you are now up and running with a distributed TiDB database com
 
 > **Note:**
 >
-> By default, TiDB (starting from v4.0.2) periodically shares usage details with PingCAP to help understand how to improve the product. For details about what is shared and how to disable the sharing, see [Telemetry](https://docs.pingcap.com/tidb/stable/telemetry).
+> By default, TiDB (versions starting from v4.0.2 and released before February 20, 2023) periodically shares usage details with PingCAP to help understand how to improve the product. For details about what is shared and how to disable the sharing, see [Telemetry](https://docs.pingcap.com/tidb/stable/telemetry). Starting from February 20, 2023, the telemetry feature is disabled by default in newly released TiDB versions. See [TiDB Release Timeline](https://docs.pingcap.com/tidb/stable/release-timeline) for details.
 
 ## Scale out the TiDB cluster
 
@@ -196,7 +196,7 @@ kubectl -n demo patch tc basic --type merge -p '{"spec":{"pd":{"replicas":${pd_r
 
 ## Access the Grafana dashboard
 
-To access the Grafana dashboards, you can forward a port from the Cloud Shell to the Grafana service in Kubernetes. (Cloud Shell already uses port 3000 so we use port 8080 in this example instead.)
+To access the Grafana dashboards, you can forward a port from the Cloud Shell to the Grafana service on Kubernetes. (Cloud Shell already uses port 3000 so we use port 8080 in this example instead.)
 
 To do so, use the following command:
 
@@ -210,7 +210,7 @@ The default username and password are both "admin".
 
 ## Destroy the TiDB cluster
 
-To destroy a TiDB cluster in Kubernetes, run the following command:
+To destroy a TiDB cluster on Kubernetes, run the following command:
 
 ```shell
 kubectl delete tc basic -n demo

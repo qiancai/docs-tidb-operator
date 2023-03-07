@@ -166,8 +166,9 @@ kubectl create namespace tidb-cluster
 {{< copyable "shell-regular" >}}
 
 ```shell
-curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-cluster.yaml &&
-curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-monitor.yaml
+curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-cluster.yaml && \
+curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-monitor.yaml && \
+curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-dashboard.yaml
 ```
 
 如需了解更详细的配置信息或者进行自定义配置，请参考[配置 TiDB 集群](configure-a-tidb-cluster.md)
@@ -269,7 +270,7 @@ gcloud compute instances create bastion \
     $ mysql --comments -h 10.128.15.243 -P 4000 -u root
     Welcome to the MariaDB monitor.  Commands end with ; or \g.
     Your MySQL connection id is 7823
-    Server version: 5.7.25-TiDB-v6.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+    Server version: 5.7.25-TiDB-v6.5.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
 
     Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 
@@ -292,7 +293,7 @@ gcloud compute instances create bastion \
     > **注意：**
     >
     > * [MySQL 8.0 默认认证插件](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_default_authentication_plugin)从 `mysql_native_password` 更新为 `caching_sha2_password`，因此如果使用 MySQL 8.0 客户端访问 TiDB 服务（TiDB 版本 < v4.0.7），并且用户账户有配置密码，需要显式指定 `--default-auth=mysql_native_password` 参数。
-    > * TiDB（v4.0.2 起）默认会定期收集使用情况信息，并将这些信息分享给 PingCAP 用于改善产品。若要了解所收集的信息详情及如何禁用该行为，请参见[遥测](https://docs.pingcap.com/zh/tidb/stable/telemetry)。
+    > * TiDB（v4.0.2 起且发布于 2023 年 2 月 20 日前的版本）默认会定期收集使用情况信息，并将这些信息分享给 PingCAP 用于改善产品。若要了解所收集的信息详情及如何禁用该行为，请参见 [TiDB 遥测功能使用文档](https://docs.pingcap.com/zh/tidb/stable/telemetry)。自 2023 年 2 月 20 日起，新发布的 TiDB 版本默认不再收集使用情况信息分享给 PingCAP，参见 [TiDB 版本发布时间线](https://docs.pingcap.com/zh/tidb/stable/release-timeline)。
 
 ### 访问 Grafana 监控
 
@@ -319,6 +320,26 @@ basic-grafana            LoadBalancer   10.15.255.169   34.123.168.114   3000:30
 > **注意：**
 >
 > Grafana 默认用户名和密码均为 admin。
+
+### 访问 TiDB Dashboard Web UI
+
+先获取 TiDB Dashboard 的 LoadBalancer 域名：
+
+{{< copyable "shell-regular" >}}
+
+```shell
+kubectl -n tidb-cluster get svc basic-tidb-dashboard-exposed
+```
+
+示例：
+
+```
+$ kubectl -n tidb-cluster get svc basic-tidb-dashboard-exposed
+NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)               AGE
+basic-tidb-dashboard-exposed            LoadBalancer   10.15.255.169   34.123.168.114   12333:30657/TCP        35m
+```
+
+你可以通过浏览器访问 `${EXTERNAL-IP}:12333` 地址查看 TiDB Dashboard 监控指标。
 
 ## 升级 TiDB 集群
 

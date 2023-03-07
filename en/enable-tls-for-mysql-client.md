@@ -210,7 +210,7 @@ You can generate multiple sets of client-side certificates. At least one set of 
 
 1. Install `cert-manager`.
 
-    Refer to [cert-manager installation in Kubernetes](https://docs.cert-manager.io/en/release-0.11/getting-started/install/kubernetes.html).
+    Refer to [cert-manager installation on Kubernetes](https://docs.cert-manager.io/en/release-0.11/getting-started/install/kubernetes.html).
 
 2. Create an Issuer to issue certificates for the TiDB cluster.
 
@@ -554,7 +554,7 @@ In this step, you create a TiDB cluster and perform the following operations:
           name: ${cluster_name}
           namespace: ${namespace}
         spec:
-          version: v6.1.0
+          version: v6.5.0
           timezone: UTC
           pvReclaimPolicy: Retain
           pd:

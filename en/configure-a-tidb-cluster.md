@@ -1,10 +1,10 @@
 ---
-title: Configure a TiDB Cluster in Kubernetes
-summary: Learn how to configure a TiDB cluster in Kubernetes.
+title: Configure a TiDB Cluster on Kubernetes
+summary: Learn how to configure a TiDB cluster on Kubernetes.
 aliases: ['/docs/tidb-in-kubernetes/dev/configure-a-tidb-cluster/','/docs/tidb-in-kubernetes/dev/configure-cluster-using-tidbcluster/']
 ---
 
-# Configure a TiDB Cluster in Kubernetes
+# Configure a TiDB Cluster on Kubernetes
 
 This document introduces how to configure a TiDB cluster for production deployment. It covers the following content:
 
@@ -18,7 +18,7 @@ This document introduces how to configure a TiDB cluster for production deployme
 
 Before deploying a TiDB cluster, it is necessary to configure the resources for each component of the cluster depending on your needs. PD, TiKV, and TiDB are the core service components of a TiDB cluster. In a production environment, you need to configure resources of these components according to their needs. For details, refer to [Hardware Recommendations](https://docs.pingcap.com/tidb/stable/hardware-and-software-requirements).
 
-To ensure the proper scheduling and stable operation of the components of the TiDB cluster in Kubernetes, it is recommended to set Guaranteed-level quality of service (QoS) by making `limits` equal to `requests` when configuring resources. For details, refer to [Configure Quality of Service for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/).
+To ensure the proper scheduling and stable operation of the components of the TiDB cluster on Kubernetes, it is recommended to set Guaranteed-level quality of service (QoS) by making `limits` equal to `requests` when configuring resources. For details, refer to [Configure Quality of Service for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/).
 
 If you are using a NUMA-based CPU, you need to enable `Static`'s CPU management policy on the node for better performance. In order to allow the TiDB cluster component to monopolize the corresponding CPU resources, the CPU quota must be an integer greater than or equal to `1`, apart from setting Guaranteed-level QoS as mentioned above. For details, refer to [Control CPU Management Policies on the Node](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies).
 
@@ -41,11 +41,11 @@ Usually, components in a cluster are in the same version. It is recommended to c
 
 Here are the formats of the parameters:
 
-- `spec.version`: the format is `imageTag`, such as `v6.1.0`
+- `spec.version`: the format is `imageTag`, such as `v6.5.0`
 
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`: the format is `imageName`, such as `pingcap/tidb`
 
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`: the format is `imageTag`, such as `v6.1.0`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`: the format is `imageTag`, such as `v6.5.0`
 
 ### Recommended configuration
 
@@ -71,6 +71,25 @@ It is recommended that you configure `spec.pvReclaimPolicy: Retain` to ensure th
 
 PD and TiKV supports configuring `mountClusterClientSecret`. If [TLS is enabled between cluster components](enable-tls-between-components.md), it is recommended to configure `spec.pd.mountClusterClientSecret: true` and `spec.tikv.mountClusterClientSecret: true`. Under such configuration, TiDB Operator automatically mounts the `${cluster_name}-cluster-client-secret` certificate to the PD and TiKV container, so you can conveniently [use `pd-ctl` and `tikv-ctl`](enable-tls-between-components.md#configure-pd-ctl-tikv-ctl-and-connect-to-the-cluster).
 
+#### startScriptVersion
+
+To choose the different versions of the startup scripts for each component, you can configure the `spec.startScriptVersion` field in the cluster spec.
+
+The supported versions of the start script are as follows:
+
+* `v1` (default): the original version of the startup script.
+
+* `v2`: to optimize the start script for each component and make sure that upgrading TiDB Operator does not result in cluster rolling restart, TiDB Operator v1.4.0 introduces `v2`. Compared to `v1`, `v2` has the following optimizations:
+
+    * Use `dig` instead of `nslookup` to resolve DNS.
+    * All components support [debug mode](tips.md#use-the-debug-mode).
+
+It is recommended that you configure `spec.startScriptVersion` as the latest version (`v2`) for the new cluster.
+
+> **Warning:**
+>
+> Modify the `startScriptVersion` field of the deployed cluster will cause the rolling restart.
+
 ### Storage
 
 #### Storage Class
@@ -81,7 +100,7 @@ Different components of a TiDB cluster have different disk requirements. Before 
 
 > **Note:**
 >
-> When you create the TiDB cluster, if you set a storage class that does not exist in the Kubernetes cluster, then the TiDB cluster creation goes to the Pending state. In this situation, you must [destroy the TiDB cluster in Kubernetes](destroy-a-tidb-cluster.md) and retry the creation.
+> When you create the TiDB cluster, if you set a storage class that does not exist in the Kubernetes cluster, then the TiDB cluster creation goes to the Pending state. In this situation, you must [destroy the TiDB cluster on Kubernetes](destroy-a-tidb-cluster.md) and retry the creation.
 
 #### Multiple disks mounting
 
@@ -514,7 +533,7 @@ Configure the `TidbCluster` CR as the following example. In the example, TiDB Op
 
 For how to configure the `spec.tidb.storageVolumes` field, refer to [Multiple disks mounting](#multiple-disks-mounting).
 
-> **Warning:
+> **Warning:**
 >
 > You need to configure `storageVolumes` before creating the cluster. After the cluster is created, adding or removing `storageVolumes` is no longer supported. For the `storageVolumes` already configured, except for increasing `storageVolume.storageSize`, other modifications are not supported. To increase `storageVolume.storageSize`, you need to make sure that the corresponding StorageClass supports [dynamic expansion](https://kubernetes.io/blog/2018/07/12/resizing-persistent-volumes-using-kubernetes/).
 
@@ -783,7 +802,7 @@ topologySpreadConstraints:
 
 Before configuring the high availability of data, read [Information Configuration of the Cluster Typology](https://docs.pingcap.com/tidb/stable/schedule-replicas-by-topology-labels) which describes how high availability of TiDB cluster is implemented.
 
-To add the data high availability feature in Kubernetes:
+To add the data high availability feature on Kubernetes:
 
 * Set the label collection of topological location for PD.
 

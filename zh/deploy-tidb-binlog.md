@@ -6,7 +6,7 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/deploy-tidb-binlog/']
 
 # 部署 TiDB Binlog
 
-本文档介绍如何在 Kubernetes 上部署 TiDB 集群的 [TiDB Binlog](https://pingcap.com/docs-cn/stable/tidb-binlog/tidb-binlog-overview/)。
+本文档介绍如何在 Kubernetes 上部署 TiDB 集群的 [TiDB Binlog](https://docs.pingcap.com/zh/tidb/stable/tidb-binlog-overview)。
 
 ## 部署准备
 
@@ -26,7 +26,7 @@ spec
   ...
   pump:
     baseImage: pingcap/tidb-binlog
-    version: v6.1.0
+    version: v6.5.0
     replicas: 1
     storageClassName: local-storage
     requests:
@@ -45,7 +45,7 @@ spec
   ...
   pump:
     baseImage: pingcap/tidb-binlog
-    version: v6.1.0
+    version: v6.5.0
     replicas: 1
     storageClassName: local-storage
     requests:
@@ -182,7 +182,7 @@ spec
 
     ```yaml
     clusterName: example-tidb
-    clusterVersion: v6.1.0
+    clusterVersion: v6.5.0
     baseImage: pingcap/tidb-binlog
     storageClassName: local-storage
     storage: 10Gi

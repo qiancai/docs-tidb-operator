@@ -11,7 +11,7 @@ aliases: ['/docs/tidb-in-kubernetes/dev/deploy-on-gcp-gke/']
 
 This document describes how to deploy a GCP Google Kubernetes Engine (GKE) cluster and deploy a TiDB cluster on GCP GKE.
 
-To deploy TiDB Operator and the TiDB cluster in a self-managed Kubernetes environment, refer to [Deploy TiDB Operator](deploy-tidb-operator.md) and [Deploy TiDB in General Kubernetes](deploy-on-general-kubernetes.md).
+To deploy TiDB Operator and the TiDB cluster in a self-managed Kubernetes environment, refer to [Deploy TiDB Operator](deploy-tidb-operator.md) and [Deploy TiDB on General Kubernetes](deploy-on-general-kubernetes.md).
 
 ## Prerequisites
 
@@ -92,7 +92,7 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: pd-custom
-provisioner: kubernetes.io/gce-pd 
+provisioner: kubernetes.io/gce-pd
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 parameters:
@@ -107,7 +107,7 @@ mountOptions:
 
 ### Use local storage
 
-For the production environment, use [zonal persistent disks](https://cloud.google.com/compute/docs/disks#pdspecs). 
+For the production environment, use [zonal persistent disks](https://cloud.google.com/compute/docs/disks#pdspecs).
 
 If you need to simulate bare-metal performance, some GCP instance types provide additional [local store volumes](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/local-ssd). You can choose such instances for the TiKV node pool to achieve higher IOPS and lower latency.
 
@@ -174,7 +174,8 @@ First, download the sample `TidbCluster` and `TidbMonitor` configuration files:
 
 ```shell
 curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-cluster.yaml && \
-curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-monitor.yaml
+curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-monitor.yaml && \
+curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/gcp/tidb-dashboard.yaml
 ```
 
 Refer to [configure the TiDB cluster](configure-a-tidb-cluster.md) to further customize and configure the CR before applying.
@@ -301,7 +302,7 @@ After the bastion host is created, you can connect to the bastion host via SSH a
 > **Note:**
 >
 > * [The default authentication plugin of MySQL 8.0](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_default_authentication_plugin) is updated from `mysql_native_password` to `caching_sha2_password`. Therefore, if you use MySQL client from MySQL 8.0 to access the TiDB service (TiDB version < v4.0.7), and if the user account has a password, you need to explicitly specify the `--default-auth=mysql_native_password` parameter.
-> * By default, TiDB (starting from v4.0.2) periodically shares usage details with PingCAP to help understand how to improve the product. For details about what is shared and how to disable the sharing, see [Telemetry](https://docs.pingcap.com/tidb/stable/telemetry).
+> * By default, TiDB (versions starting from v4.0.2 and released before February 20, 2023) periodically shares usage details with PingCAP to help understand how to improve the product. For details about what is shared and how to disable the sharing, see [Telemetry](https://docs.pingcap.com/tidb/stable/telemetry). Starting from February 20, 2023, the telemetry feature is disabled by default in newly released TiDB versions. See [TiDB Release Timeline](https://docs.pingcap.com/tidb/stable/release-timeline) for details.
 
 ### Access the Grafana monitoring dashboard
 
@@ -328,6 +329,26 @@ You can access the `${grafana-lb}:3000` address using your web browser to view m
 > **Note:**
 >
 > The default Grafana username and password are both `admin`.
+
+### Access TiDB Dashboard Web UI
+
+Obtain the `LoadBalancer` domain name of TiDB Dashboard by running the following command:
+
+{{< copyable "shell-regular" >}}
+
+```shell
+kubectl -n tidb-cluster get svc basic-tidb-dashboard-exposed
+```
+
+The following is an example:
+
+```
+$ kubectl -n tidb-cluster get svc basic-tidb-dashboard-exposed
+NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)               AGE
+basic-tidb-dashboard-exposed            LoadBalancer   10.15.255.169   34.123.168.114   12333:30657/TCP        35m
+```
+
+You can view monitoring metrics of TiDB Dashboard by visiting `${EXTERNAL-IP}:12333` using your web browser.
 
 ## Upgrade
 

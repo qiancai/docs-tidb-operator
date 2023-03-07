@@ -1,9 +1,10 @@
 <!-- markdownlint-disable MD007 -->
 <!-- markdownlint-disable MD041 -->
 
+- [TiDB on Kubernetes 文档](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev)
 - 关于 TiDB Operator
   - [简介](tidb-operator-overview.md)
-  - [v1.3 新特性](whats-new-in-v1.3.md)
+  - [v1.4 新特性](whats-new-in-v1.4.md)
 - [快速上手](get-started.md)
 - 部署
   - 自托管的 Kubernetes
@@ -75,6 +76,12 @@
     - 使用持久卷
       - [使用 BR 备份 TiDB 集群数据到持久卷](backup-to-pv-using-br.md)
       - [使用 BR 恢复持久卷上的备份数据](restore-from-pv-using-br.md)
+    - 基于快照的备份和恢复
+      - [功能架构](volume-snapshot-backup-restore.md)
+      - [基于 EBS 快照备份 TiDB 集群](backup-to-aws-s3-by-snapshot.md)
+      - [基于 EBS 快照恢复 TiDB 集群](restore-from-aws-s3-by-snapshot.md)
+      - [基于 EBS 卷快照备份恢复的性能介绍](backup-restore-snapshot-perf.md)
+      - [基于 EBS 快照备份恢复的常见问题](backup-restore-faq.md)
   - 运维
     - [重启 TiDB 集群](restart-a-tidb-cluster.md)
     - [销毁 TiDB 集群](destroy-a-tidb-cluster.md)
@@ -82,6 +89,7 @@
     - [修改 TiDB 集群配置](modify-tidb-configuration.md)
     - [配置集群故障自动转移](use-auto-failover.md)
     - [暂停 TiDB 集群同步](pause-sync-of-tidb-cluster.md)
+    - [挂起 TiDB 集群](suspend-tidb-cluster.md)
     - [使用多套 TiDB Operator 单独管理不同的 TiDB 集群](deploy-multiple-tidb-operator.md)
     - [维护 TiDB 集群所在的 Kubernetes 节点](maintain-a-kubernetes-node.md)
     - [从 Helm 2 迁移到 Helm 3](migrate-to-helm3.md)
@@ -118,8 +126,17 @@
   - [PingCAP Clinic 数据采集范围说明](clinic-data-collection.md)
 - 版本发布历史
   - v1.4
+    - [1.4.3](releases/release-1.4.3.md)
+    - [1.4.2](releases/release-1.4.2.md)
+    - [1.4.1](releases/release-1.4.1.md)
+    - [1.4 GA](releases/release-1.4.0.md)
+    - [1.4.0-beta.3](releases/release-1.4.0-beta.3.md)
+    - [1.4.0-beta.2](releases/release-1.4.0-beta.2.md)
+    - [1.4.0-beta.1](releases/release-1.4.0-beta.1.md)
     - [1.4.0-alpha.1](releases/release-1.4.0-alpha.1.md)
   - v1.3
+    - [1.3.10](releases/release-1.3.10.md)
+    - [1.3.9](releases/release-1.3.9.md)
     - [1.3.8](releases/release-1.3.8.md)
     - [1.3.7](releases/release-1.3.7.md)
     - [1.3.6](releases/release-1.3.6.md)

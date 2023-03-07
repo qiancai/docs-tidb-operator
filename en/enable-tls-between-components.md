@@ -6,7 +6,7 @@ aliases: ['/docs/tidb-in-kubernetes/dev/enable-tls-between-components/']
 
 # Enable TLS between TiDB Components
 
-This document describes how to enable Transport Layer Security (TLS) between components of the TiDB cluster in Kubernetes, which is supported since TiDB Operator v1.1.
+This document describes how to enable Transport Layer Security (TLS) between components of the TiDB cluster on Kubernetes, which is supported since TiDB Operator v1.1.
 
 To enable TLS between TiDB components, perform the following steps:
 
@@ -643,7 +643,7 @@ This section describes how to issue certificates using two methods: `cfssl` and 
 
 1. Install `cert-manager`.
 
-    Refer to [cert-manager installation in Kubernetes](https://docs.cert-manager.io/en/release-0.11/getting-started/install/kubernetes.html) for details.
+    Refer to [cert-manager installation on Kubernetes](https://docs.cert-manager.io/en/release-0.11/getting-started/install/kubernetes.html) for details.
 
 2. Create an Issuer to issue certificates to the TiDB cluster.
 
@@ -1337,7 +1337,7 @@ In this step, you need to perform the following operations:
     spec:
      tlsCluster:
        enabled: true
-     version: v6.1.0
+     version: v6.5.0
      timezone: UTC
      pvReclaimPolicy: Retain
      pd:
@@ -1396,7 +1396,7 @@ In this step, you need to perform the following operations:
        version: 7.5.11
      initializer:
        baseImage: pingcap/tidb-monitor-initializer
-       version: v6.1.0
+       version: v6.5.0
      reloader:
        baseImage: pingcap/tidb-monitor-reloader
        version: v1.0.1

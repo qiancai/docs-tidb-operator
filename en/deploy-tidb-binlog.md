@@ -1,12 +1,12 @@
 ---
 title: Deploy TiDB Binlog
-summary: Learn how to deploy TiDB Binlog for a TiDB cluster in Kubernetes.
+summary: Learn how to deploy TiDB Binlog for a TiDB cluster on Kubernetes.
 aliases: ['/docs/tidb-in-kubernetes/dev/deploy-tidb-binlog/']
 ---
 
 # Deploy TiDB Binlog
 
-This document describes how to maintain [TiDB Binlog](https://docs.pingcap.com/tidb/stable/tidb-binlog-overview) of a TiDB cluster in Kubernetes.
+This document describes how to maintain [TiDB Binlog](https://docs.pingcap.com/tidb/stable/tidb-binlog-overview) of a TiDB cluster on Kubernetes.
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ TiDB Binlog is disabled in the TiDB cluster by default. To create a TiDB cluster
       ...
       pump:
         baseImage: pingcap/tidb-binlog
-        version: v6.1.0
+        version: v6.5.0
         replicas: 1
         storageClassName: local-storage
         requests:
@@ -47,7 +47,7 @@ TiDB Binlog is disabled in the TiDB cluster by default. To create a TiDB cluster
       ...
       pump:
         baseImage: pingcap/tidb-binlog
-        version: v6.1.0
+        version: v6.5.0
         replicas: 1
         storageClassName: local-storage
         requests:
@@ -188,7 +188,7 @@ To deploy multiple drainers using the `tidb-drainer` Helm chart for a TiDB clust
 
     ```yaml
     clusterName: example-tidb
-    clusterVersion: v6.1.0
+    clusterVersion: v6.5.0
     baseImage:pingcap/tidb-binlog
     storageClassName: local-storage
     storage: 10Gi
@@ -213,7 +213,7 @@ To deploy multiple drainers using the `tidb-drainer` Helm chart for a TiDB clust
 
     The `initialCommitTs` is the starting commit timestamp of data replication when Drainer has no checkpoint. The value must be set as a string type, such as `"424364429251444742"`.
 
-    For complete configuration details, refer to [TiDB Binlog Drainer Configurations in Kubernetes](configure-tidb-binlog-drainer.md).
+    For complete configuration details, refer to [TiDB Binlog Drainer Configurations on Kubernetes](configure-tidb-binlog-drainer.md).
 
 4. Deploy Drainer:
 

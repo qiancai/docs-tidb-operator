@@ -261,7 +261,7 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
     {{< copyable "shell-regular" >}}
 
     ```shell
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.4.3
     ```
 
     如果访问 Docker Hub 网速较慢，可以使用阿里云上的镜像：
@@ -269,9 +269,9 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
     {{< copyable "shell-regular" >}}
 
     ```
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.3.8 \
-        --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.3.8 \
-        --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.3.8 \
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.4.3 \
+        --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.4.3 \
+        --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.4.3 \
         --set scheduler.kubeSchedulerImageName=registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler
     ```
 
@@ -347,6 +347,31 @@ tidbcluster.pingcap.com/basic created
 </details>
 
 如果要将 TiDB 集群部署到 ARM64 机器上，可以参考[在 ARM64 机器上部署 TiDB 集群](deploy-cluster-on-arm64.md)。
+
+### 部署独立的 TiDB Dashboard
+
+{{< copyable "shell-regular" >}}
+
+``` shell
+kubectl -n tidb-cluster apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic/tidb-dashboard.yaml
+```
+
+如果访问 Docker Hub 网速较慢，可以使用 UCloud 上的镜像：
+
+{{< copyable "shell-regular" >}}
+
+```
+kubectl -n tidb-cluster apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic-cn/tidb-dashboard.yaml
+```
+
+<details>
+<summary>点击查看期望输出</summary>
+
+```
+tidbdashboard.pingcap.com/basic created
+```
+
+</details>
 
 ### 部署 TiDB 集群监控
 
@@ -465,7 +490,7 @@ mysql --comments -h 127.0.0.1 -P 14000 -u root
 ```
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MySQL connection id is 178505
-Server version: 5.7.25-TiDB-v6.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+Server version: 5.7.25-TiDB-v6.5.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
 
 Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 
@@ -514,10 +539,10 @@ mysql> select * from information_schema.tikv_region_status where db_name=databas
 ```sql
 mysql> select tidb_version()\G
 *************************** 1. row ***************************
-         tidb_version(): Release Version: v6.1.0
+         tidb_version(): Release Version: v6.5.0
                 Edition: Community
         Git Commit Hash: 4a1b2e9fe5b5afb1068c56de47adb07098d768d6
-             Git Branch: heads/refs/tags/v6.1.0
+             Git Branch: heads/refs/tags/v6.5.0
          UTC Build Time: 2021-11-24 13:32:39
               GoVersion: go1.16.4
            Race Enabled: false
@@ -616,6 +641,26 @@ kubectl port-forward --address 0.0.0.0 -n tidb-cluster svc/basic-grafana 3000 > 
 
 了解更多使用 TiDB Operator 部署 TiDB 集群监控的信息，可以查阅 [TiDB 集群监控与告警](monitor-a-tidb-cluster.md)。
 
+### 访问 TiDB Dashboard Web UI
+
+你可以转发 TiDB Dashboard 服务端口，以便本地访问 TiDB Dashboard 界面。
+
+{{< copyable "shell-regular" >}}
+
+``` shell
+kubectl port-forward -n tidb-cluster svc/basic-tidb-dashboard-exposed 12333 > pf12333.out &
+```
+
+TiDB Dashboard 面板可在 kubectl 所运行的主机上通过 <http://localhost:12333> 访问。
+
+请注意，如果你是非本机（比如 Docker 容器或远程服务器）上运行 `kubectl port-forward`，将无法在本地浏览器里通过 `localhost` 访问，可以通过下面命令监听所有地址：
+
+```bash
+kubectl port-forward --address 0.0.0.0 -n tidb-cluster svc/basic-tidb-dashboard-exposed 12333 > pf12333.out &
+```
+
+然后通过 <http://${远程服务器IP}:12333> 访问 TiDB Dashboard。
+
 ## 第 5 步：升级 TiDB 集群
 
 TiDB Operator 还可简化 TiDB 集群的滚动升级。以下展示使用 kubectl 命令行工具更新 TiDB 版本到 nightly 版本的过程。在此之前，先了解一下 kubectl 的子命令 `kubectl patch`。 它可以直接应用补丁。Kubernetes 支持几种不同的补丁策略，每种策略有不同的功能、格式等。可参考 [Kubernetes Patch](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/) 了解更多细节。
@@ -689,7 +734,7 @@ mysql --comments -h 127.0.0.1 -P 24000 -u root -e 'select tidb_version()\G'
 
 ```
 *************************** 1. row ***************************
-tidb_version(): Release Version: v6.1.0-alpha-445-g778e188fa
+tidb_version(): Release Version: v6.5.0-alpha-445-g778e188fa
 Edition: Community
 Git Commit Hash: 778e188fa7af4f48497ff9e05ca6681bf9a5fa16
 Git Branch: master

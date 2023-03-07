@@ -17,7 +17,7 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/configure-a-tidb-cluster/','/zh/tidb-
 
 ## 资源配置
 
-部署前需要根据实际情况和需求，为 TiDB 集群各个组件配置资源，其中 PD、TiKV、TiDB 是 TiDB 集群的核心服务组件，在生产环境下它们的资源配置还需要按组件要求指定，具体参考：[资源配置推荐](https://pingcap.com/docs-cn/stable/how-to/deploy/hardware-recommendations)。
+部署前需要根据实际情况和需求，为 TiDB 集群各个组件配置资源，其中 PD、TiKV、TiDB 是 TiDB 集群的核心服务组件，在生产环境下它们的资源配置还需要按组件要求指定，具体参考：[资源配置推荐](https://docs.pingcap.com/zh/tidb/stable/hardware-and-software-requirements)。
 
 为了保证 TiDB 集群的组件在 Kubernetes 中合理的调度和稳定的运行，建议为其设置 Guaranteed 级别的 QoS，通过在配置资源时让 limits 等于 requests 来实现, 具体参考：[配置 QoS](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)。
 
@@ -41,9 +41,9 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/configure-a-tidb-cluster/','/zh/tidb-
 
 相关参数的格式如下：
 
-- `spec.version`，格式为 `imageTag`，例如 `v6.1.0`
+- `spec.version`，格式为 `imageTag`，例如 `v6.5.0`
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`，格式为 `imageName`，例如 `pingcap/tidb`
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v6.1.0`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v6.5.0`
 
 ### 推荐配置
 
@@ -66,6 +66,25 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/configure-a-tidb-cluster/','/zh/tidb-
 #### mountClusterClientSecret
 
 PD 和 TiKV 支持配置 `mountClusterClientSecret`。如果开启了[集群组件间 TLS 支持](enable-tls-between-components.md)，建议配置 `spec.pd.mountClusterClientSecret: true` 和 `spec.tikv.mountClusterClientSecret: true`，这样 TiDB Operator 会自动将 `${cluster_name}-cluster-client-secret` 证书挂载到 PD 和 TiKV 容器，方便[使用 `pd-ctl` 和 `tikv-ctl`](enable-tls-between-components.md#第三步配置-pd-ctltikv-ctl-连接集群)。
+
+#### startScriptVersion
+
+你可以配置 `spec.startScriptVersion` 字段，用于选择各个组件的不同版本的启动脚本。
+
+目前支持的启动脚本的版本如下：
+
+* `v1`：默认值，最初版本的启动脚本。
+
+* `v2`：为了优化各个组件的启动脚本，并且确保在升级 TiDB Operator 后不会导致集群滚动重启，自 TiDB Operator v1.4.0 起新增 `v2` 版本。相比于 `v1`，`v2` 有以下优化：
+
+    * 使用 `dig` 命令替换 `nslookup` 命令来解析 DNS。
+    * 所有组件都支持[诊断模式](tips.md#诊断模式)。
+
+新部署的集群建议配置 `spec.startScriptVersion` 为最新的版本，即 `v2`。
+
+> **警告：**
+>
+> 修改已经部署的集群的 `spec.startScriptVersion` 会导致集群滚动重启。
 
 ### 存储
 
@@ -305,7 +324,7 @@ spec:
       oom-action = "log"
 ```
 
-获取所有可以配置的 TiDB 配置参数，请参考 [TiDB 配置文档](https://pingcap.com/docs-cn/stable/tidb-configuration-file/)。
+获取所有可以配置的 TiDB 配置参数，请参考 [TiDB 配置文档](https://docs.pingcap.com/zh/tidb/stable/tidb-configuration-file)。
 
 > **注意：**
 >
@@ -324,7 +343,7 @@ spec:
           capacity = "16GB"
 ```
 
-获取所有可以配置的 TiKV 配置参数，请参考 [TiKV 配置文档](https://pingcap.com/docs-cn/stable/tikv-configuration-file/)
+获取所有可以配置的 TiKV 配置参数，请参考 [TiKV 配置文档](https://docs.pingcap.com/zh/tidb/stable/tikv-configuration-file)
 
 > **注意：**
 >
@@ -342,7 +361,7 @@ spec:
       enable-prevote = true
 ```
 
-获取所有可以配置的 PD 配置参数，请参考 [PD 配置文档](https://pingcap.com/docs-cn/stable/pd-configuration-file/)
+获取所有可以配置的 PD 配置参数，请参考 [PD 配置文档](https://docs.pingcap.com/zh/tidb/stable/pd-configuration-file)
 
 > **注意：**
 >
@@ -368,7 +387,7 @@ spec:
           log = "/data0/logs/server.log"
 ```
 
-获取所有可以配置的 TiFlash 配置参数，请参考 [TiFlash 配置文档](https://pingcap.com/docs-cn/stable/tiflash/tiflash-configuration/)
+获取所有可以配置的 TiFlash 配置参数，请参考 [TiFlash 配置文档](https://docs.pingcap.com/zh/tidb/stable/tiflash-configuration)
 
 #### 配置 TiCDC 启动参数
 
@@ -756,7 +775,7 @@ topologySpreadConstraints:
 
 ### 数据的高可用
 
-在开始数据高可用配置前，首先请阅读[集群拓扑信息配置](https://pingcap.com/docs-cn/stable/schedule-replicas-by-topology-labels/)。该文档描述了 TiDB 集群数据高可用的实现原理。
+在开始数据高可用配置前，首先请阅读[集群拓扑信息配置](https://docs.pingcap.com/zh/tidb/stable/schedule-replicas-by-topology-labels)。该文档描述了 TiDB 集群数据高可用的实现原理。
 
 在 Kubernetes 上支持数据高可用的功能，需要如下操作：
 

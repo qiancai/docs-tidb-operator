@@ -1,6 +1,6 @@
 ---
 title: Deploy Monitoring and Alerts for a TiDB Cluster
-summary: Learn how to monitor a TiDB cluster in Kubernetes.
+summary: Learn how to monitor a TiDB cluster on Kubernetes.
 aliases: ['/docs/tidb-in-kubernetes/dev/monitor-a-tidb-cluster/','/docs/tidb-in-kubernetes/dev/monitor-using-tidbmonitor/','/tidb-in-kubernetes/dev/monitor-using-tidbmonitor/']
 ---
 
@@ -51,7 +51,7 @@ spec:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
@@ -173,7 +173,7 @@ spec:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
@@ -232,7 +232,7 @@ spec:
         foo: "bar"
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
@@ -274,7 +274,7 @@ spec:
       type: ClusterIP
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
@@ -357,7 +357,7 @@ spec:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1

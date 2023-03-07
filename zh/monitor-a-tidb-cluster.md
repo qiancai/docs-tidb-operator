@@ -12,7 +12,7 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/monitor-a-tidb-cluster/', '/docs-cn/t
 
 TiDB 通过 Prometheus 和 Grafana 监控 TiDB 集群。在通过 TiDB Operator 创建新的 TiDB 集群时，可以对于每个 TiDB 集群，创建、配置一套独立的监控系统，与 TiDB 集群运行在同一 Namespace，包括 Prometheus 和 Grafana 两个组件。
 
-在 [TiDB 集群监控](https://pingcap.com/docs-cn/stable/deploy-monitoring-services/)中有一些监控系统配置的细节可供参考。
+在 [TiDB 集群监控](https://docs.pingcap.com/zh/tidb/stable/deploy-monitoring-services)中有一些监控系统配置的细节可供参考。
 
 在 v1.1 及更高版本的 TiDB Operator 中，可以通过简单的 CR 文件（即 TidbMonitor，可参考 [tidb-operator 中的示例](https://github.com/pingcap/tidb-operator/blob/master/manifests/monitor/tidb-monitor.yaml)）来快速建立对 Kubernetes 集群上的 TiDB 集群的监控。
 
@@ -49,7 +49,7 @@ spec:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
@@ -171,7 +171,7 @@ spec:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
@@ -228,7 +228,7 @@ spec:
         foo: "bar"
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
@@ -270,7 +270,7 @@ spec:
       type: ClusterIP
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
@@ -351,7 +351,7 @@ spec:
       type: NodePort
   initializer:
     baseImage: pingcap/tidb-monitor-initializer
-    version: v6.1.0
+    version: v6.5.0
   reloader:
     baseImage: pingcap/tidb-monitor-reloader
     version: v1.0.1
