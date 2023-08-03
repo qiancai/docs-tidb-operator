@@ -6,15 +6,13 @@ hide_sidebar: true
 hide_commit: true
 ---
 
-<LearningPathContainer platform="tidb-operator" title="TiDB on Kubernetes Documentation" subTitle="Using TiDB Operator provided by PingCAP, you can run and maintain TiDB seamlessly on the Kubernetes clusters deployed on a public cloud or on premises.">
+<LearningPathContainer platform="tidb-operator" title="TiDB on Kubernetes Documentation" subTitle="Using TiDB Operator provided by PingCAP, you can run and maintain TiDB seamlessly on the Kubernetes clusters deployed on a public cloud or in a self-hosted environment.">
 
 <LearningPath label="Learn" icon="cloud1">
 
 [TiDB Operator Overview](https://docs.pingcap.com/tidb-in-kubernetes/dev/tidb-operator-overview)
 
 [TiDB Operator Architecture](https://docs.pingcap.com/tidb-in-kubernetes/dev/architecture)
-
-[What's New in v1.4](https://docs.pingcap.com/tidb-in-kubernetes/dev/whats-new-in-v1.4)
 
 [Get Started](https://docs.pingcap.com/tidb-in-kubernetes/dev/get-started)
 
@@ -26,7 +24,7 @@ hide_commit: true
 
 [On Amazon EKS](https://docs.pingcap.com/tidb-in-kubernetes/dev/deploy-on-aws-eks)
 
-[On GCP GKE](https://docs.pingcap.com/tidb-in-kubernetes/dev/deploy-on-gcp-gke)
+[On Google Cloud GKE](https://docs.pingcap.com/tidb-in-kubernetes/dev/deploy-on-gcp-gke)
 
 [On Azure AKS](https://docs.pingcap.com/tidb-in-kubernetes/dev/deploy-on-azure-aks)
 

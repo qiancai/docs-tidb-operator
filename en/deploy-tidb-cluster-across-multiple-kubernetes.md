@@ -14,7 +14,7 @@ You need to configure the Kubernetes network and DNS so that the Kubernetes clus
 - The TiDB components on each Kubernetes cluster can access the Pod IP of all TiDB components in and between clusters.
 - The TiDB components on each Kubernetes cluster can look up the Pod FQDN of all TiDB components in and between clusters.
 
-To build multiple connected EKS or GKE clusters, refer to [Build Multiple Interconnected AWS EKS Clusters](build-multi-aws-eks.md) or [Build Multiple Interconnected GCP GKE Clusters](build-multi-gcp-gke.md).
+To build multiple connected EKS or GKE clusters, refer to [Build Multiple Interconnected AWS EKS Clusters](build-multi-aws-eks.md) or [Build Multiple Interconnected Google Cloud GKE Clusters](build-multi-gcp-gke.md).
 
 ## Supported scenarios
 
@@ -52,7 +52,7 @@ kind: TidbCluster
 metadata:
   name: "${tc_name_1}"
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   pvReclaimPolicy: Delete
   enableDynamicConfiguration: true
@@ -106,7 +106,7 @@ kind: TidbCluster
 metadata:
   name: "${tc_name_2}"
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   pvReclaimPolicy: Delete
   enableDynamicConfiguration: true
@@ -383,7 +383,7 @@ kind: TidbCluster
 metadata:
   name: "${tc_name_1}"
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   tlsCluster:
    enabled: true
@@ -441,7 +441,7 @@ kind: TidbCluster
 metadata:
   name: "${tc_name_2}"
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   tlsCluster:
    enabled: true
@@ -516,7 +516,7 @@ For a TiDB cluster deployed across Kubernetes clusters, to perform a rolling upg
     1. If TiFlash is deployed in clusters, upgrade the TiFlash versions for all the Kubernetes clusters that have TiFlash deployed.
     2. Upgrade TiKV versions for all Kubernetes clusters.
     3. If Pump is deployed in clusters, upgrade the Pump versions for all the Kubernetes clusters that have Pump deployed.
-    4. Upgrade TiDM versions for all Kubernetes clusters.
+    4. Upgrade TiDB versions for all Kubernetes clusters.
     5. If TiCDC is deployed in clusters, upgrade the TiCDC versions for all the Kubernetes clusters that have TiCDC deployed.
 
 ## Exit and reclaim TidbCluster that already join a cross-Kubernetes cluster

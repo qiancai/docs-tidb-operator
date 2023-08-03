@@ -4,7 +4,6 @@
 - [TiDB on Kubernetes 文档](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev)
 - 关于 TiDB Operator
   - [简介](tidb-operator-overview.md)
-  - [v1.4 新特性](whats-new-in-v1.4.md)
 - [快速上手](get-started.md)
 - 部署
   - 自托管的 Kubernetes
@@ -17,14 +16,14 @@
     - [访问 TiDB 集群](access-tidb.md)
   - 公有云的 Kubernetes
     - [Amazon EKS](deploy-on-aws-eks.md)
-    - [GCP GKE](deploy-on-gcp-gke.md)
+    - [Google Cloud GKE](deploy-on-gcp-gke.md)
     - [Azure AKS](deploy-on-azure-aks.md)
     - [阿里云 ACK](deploy-on-alibaba-cloud.md)
   - [在 ARM64 机器上部署 TiDB 集群](deploy-cluster-on-arm64.md)
   - [部署 TiDB HTAP 存储引擎 TiFlash](deploy-tiflash.md)
   - 跨多个 Kubernetes 集群部署 TiDB 集群
     - [构建多个网络互通的 AWS EKS 集群](build-multi-aws-eks.md)
-    - [构建多个网络互通的 GCP GKE 集群](build-multi-gcp-gke.md)
+    - [构建多个网络互通的 GKE 集群](build-multi-gcp-gke.md)
     - [跨多个 Kubernetes 集群部署 TiDB 集群](deploy-tidb-cluster-across-multiple-kubernetes.md)
   - [部署 TiDB 异构集群](deploy-heterogeneous-tidb-cluster.md)
   - [部署增量数据同步工具 TiCDC](deploy-ticdc.md)
@@ -125,7 +124,13 @@
   - [Kubernetes 监控与告警](monitor-kubernetes.md)
   - [PingCAP Clinic 数据采集范围说明](clinic-data-collection.md)
 - 版本发布历史
+  - v1.5
+    - [1.5.0-beta.1](releases/release-1.5.0-beta.1.md)
   - v1.4
+    - [1.4.7](releases/release-1.4.7.md)
+    - [1.4.6](releases/release-1.4.6.md)
+    - [1.4.5](releases/release-1.4.5.md)
+    - [1.4.4](releases/release-1.4.4.md)
     - [1.4.3](releases/release-1.4.3.md)
     - [1.4.2](releases/release-1.4.2.md)
     - [1.4.1](releases/release-1.4.1.md)

@@ -6,7 +6,7 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/tidb-operator-overview/']
 
 # TiDB Operator 简介
 
-[TiDB Operator](https://github.com/pingcap/tidb-operator) 是 Kubernetes 上的 TiDB 集群自动运维系统，提供包括部署、升级、扩缩容、备份恢复、配置变更的 TiDB 全生命周期管理。借助 TiDB Operator，TiDB 可以无缝运行在公有云或私有部署的 Kubernetes 集群上。
+[TiDB Operator](https://github.com/pingcap/tidb-operator) 是 Kubernetes 上的 TiDB 集群自动运维系统，提供包括部署、升级、扩缩容、备份恢复、配置变更的 TiDB 全生命周期管理。借助 TiDB Operator，TiDB 可以无缝运行在公有云或自托管的 Kubernetes 集群上。
 
 TiDB Operator 与适用的 TiDB 版本的对应关系如下：
 
@@ -14,7 +14,7 @@ TiDB Operator 与适用的 TiDB 版本的对应关系如下：
 |:---|:---|
 | dev               | dev                 |
 | TiDB >= 6.5       | 1.4（推荐），1.3     |
-| TiDB >= 5.4       | 1.4，1.3（推荐）          |
+| 5.4 <= TiDB < 6.5 | 1.4, 1.3（推荐）   |
 | 5.1 <= TiDB < 5.4 | 1.4，1.3（推荐），1.2      |
 | 3.0 <= TiDB < 5.1 | 1.4，1.3（推荐），1.2，1.1 |
 | 2.1 <= TiDB < v3.0| 1.0（停止维护）       |
@@ -33,10 +33,10 @@ TiDB Operator 提供了多种方式来部署 Kubernetes 上的 TiDB 集群：
 
     - 在公有云上部署生产可用的 TiDB 集群并进行后续的运维管理；
 
-        - [Deploy TiDB on AWS EKS](deploy-on-aws-eks.md)
-        - [Deploy TiDB on GCP GKE (beta)](deploy-on-gcp-gke.md)
-        - [Deploy TiDB on Azure AKS](deploy-on-azure-aks.md)
-        - [Deploy TiDB on Alibaba Cloud ACK](deploy-on-alibaba-cloud.md)
+        - [在 AWS EKS 上部署 TiDB 集群](deploy-on-aws-eks.md)
+        - [在 Google Cloud GKE 上部署 TiDB 集群](deploy-on-gcp-gke.md)
+        - [在 Azure AKS 上部署 TiDB 集群](deploy-on-azure-aks.md)
+        - [在阿里云 ACK 上部署 TiDB 集群](deploy-on-alibaba-cloud.md)
 
     - 在自托管的 Kubernetes 集群中部署 TiDB 集群：
 

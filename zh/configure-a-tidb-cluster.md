@@ -41,9 +41,9 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/configure-a-tidb-cluster/','/zh/tidb-
 
 相关参数的格式如下：
 
-- `spec.version`，格式为 `imageTag`，例如 `v6.5.0`
+- `spec.version`，格式为 `imageTag`，例如 `v7.1.0`
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`，格式为 `imageName`，例如 `pingcap/tidb`
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v6.5.0`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v7.1.0`
 
 ### 推荐配置
 
@@ -176,9 +176,9 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
 ```yaml
   pd:
     config: |
-      data-dir=/pd/data
+      data-dir = "/pd/data"
       [log.file]
-        filename=/pd/log/pd.log
+        filename = "/pd/log/pd.log"
     storageVolumes:
     - name: data
       storageSize: "10Gi"
@@ -223,7 +223,7 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
 
 ### HostNetwork
 
-PD、TiKV、TiDB、TiFlash、TiCDC 及 Pump 支持配置 Pod 使用宿主机上的网络命名空间 [`HostNetwork`](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces)。可通过配置 `spec.hostNetwork: true` 为所有受支持的组件开启，或通过为特定组件配置 `hostNetwork: true` 为单个或多个组件开启。
+PD、TiKV、TiDB、TiFlash、TiCDC 及 Pump 支持配置 Pod 使用宿主机上的网络命名空间 [`HostNetwork`](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy)。可通过配置 `spec.hostNetwork: true` 为所有受支持的组件开启，或通过为特定组件配置 `hostNetwork: true` 为单个或多个组件开启。
 
 ### Discovery
 
@@ -603,7 +603,7 @@ NodePort 有两种模式：
 
 #### LoadBalancer
 
-若运行在有 LoadBalancer 的环境，比如 GCP/AWS 平台，建议使用云平台的 LoadBalancer 特性。
+若运行在有 LoadBalancer 的环境，比如 Google Cloud、AWS 平台，建议使用云平台的 LoadBalancer 特性。
 
 ```yaml
 spec:
@@ -616,6 +616,20 @@ spec:
 ```
 
 访问 [Kubernetes Service 文档](https://kubernetes.io/docs/concepts/services-networking/service/)，了解更多 Service 特性以及云平台 Load Balancer 支持。
+
+### IPv6 支持
+
+TiDB 自 v6.5.1 起支持使用 IPv6 地址进行所有网络连接。如果你使用 v1.4.3 或以上版本的 TiDB Operator 部署 TiDB，你可以通过配置 `spec.preferIPv6` 为 `ture` 来部署监听 IPv6 地址的 TiDB 集群。
+
+```yaml
+spec:
+  preferIPv6: true
+  # ...
+```
+
+> **警告：**
+>
+> 该配置只适用于部署集群时配置，无法在已经部署的 TiDB 集群上开启，否则会导致集群不可用。
 
 ## 高可用配置
 

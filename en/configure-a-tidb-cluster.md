@@ -41,11 +41,11 @@ Usually, components in a cluster are in the same version. It is recommended to c
 
 Here are the formats of the parameters:
 
-- `spec.version`: the format is `imageTag`, such as `v6.5.0`
+- `spec.version`: the format is `imageTag`, such as `v7.1.0`
 
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`: the format is `imageName`, such as `pingcap/tidb`
 
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`: the format is `imageTag`, such as `v6.5.0`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`: the format is `imageTag`, such as `v7.1.0`
 
 ### Recommended configuration
 
@@ -176,9 +176,9 @@ To mount multiple PVs for PD:
 ```yaml
   pd:
     config: |
-      data-dir=/pd/data
+      data-dir = "/pd/data"
       [log.file]
-        filename=/pd/log/pd.log
+        filename = "/pd/log/pd.log"
     storageVolumes:
     - name: data
       storageSize: "10Gi"
@@ -223,7 +223,7 @@ To mount multiple PVs for TiCDC:
 
 ### HostNetwork
 
-For PD, TiKV, TiDB, TiFlash, TiCDC, and Pump, you can configure the Pods to use the host namespace [`HostNetwork`](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces).
+For PD, TiKV, TiDB, TiFlash, TiCDC, and Pump, you can configure the Pods to use the host namespace [`HostNetwork`](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy).
 
 To enable `HostNetwork` for all supported components, configure `spec.hostNetwork: true`.
 
@@ -627,7 +627,7 @@ NodePort has two modes:
 
 #### LoadBalancer
 
-If the TiDB cluster runs in an environment with LoadBalancer, such as on GCP or AWS, it is recommended to use the LoadBalancer feature of these cloud platforms by setting `tidb.service.type=LoadBalancer`.
+If the TiDB cluster runs in an environment with LoadBalancer, such as on Google Cloud or AWS, it is recommended to use the LoadBalancer feature of these cloud platforms by setting `tidb.service.type=LoadBalancer`.
 
 ```yaml
 spec:
@@ -641,6 +641,20 @@ spec:
 ```
 
 See [Kubernetes Service Documentation](https://kubernetes.io/docs/concepts/services-networking/service/) to know more about the features of Service and what LoadBalancer in the cloud platform supports.
+
+### IPv6 Support
+
+Starting v6.5.1, TiDB supports using IPv6 addresses for all network connections. If you deploy TiDB using TiDB Operator v1.4.3 or later versions, you can enable the TiDB cluster to listen on IPv6 addresses by configuring `spec.preferIPv6` to `true`.
+
+```yaml
+spec:
+  preferIPv6: true
+  # ...
+```
+
+> **Warning:**
+>
+> This configuration can only be applied when deploying the TiDB cluster and cannot be enabled on deployed clusters, as it may cause the cluster to become unavailable.
 
 ## Configure high availability
 

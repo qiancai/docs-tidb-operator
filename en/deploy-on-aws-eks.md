@@ -176,6 +176,10 @@ This section describes how to configure the storage class for different storage 
 
 ### Configure `gp2`
 
+> **note:**
+>
+> Starting from EKS Kubernetes 1.23, you need to deploy the EBS CSI driver before using the default gp2 storage class. For details, refer to [the notice for Amazon EKS Kubernetes 1.23](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#kubernetes-1.23).
+
 After you create an EKS cluster, the default StorageClass is `gp2`. To improve I/O write performance, it is recommended to configure `nodelalloc` and `noatime` in the `mountOptions` field of the `StorageClass` resource.
 
 ```yaml
@@ -457,9 +461,9 @@ After the bastion host is created, you can connect to the bastion host via SSH a
     $ mysql --comments -h abfc623004ccb4cc3b363f3f37475af1-9774d22c27310bc1.elb.us-west-2.amazonaws.com -P 4000 -u root
     Welcome to the MariaDB monitor.  Commands end with ; or \g.
     Your MySQL connection id is 1189
-    Server version: 5.7.25-TiDB-v4.0.2 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+    Server version: 5.7.25-TiDB-v7.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
 
-    Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+    Copyright (c) 2000, 2022, Oracle and/or its affiliates.
 
     Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 

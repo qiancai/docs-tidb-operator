@@ -4,7 +4,6 @@
 - [TiDB on Kubernetes Docs](https://docs.pingcap.com/tidb-in-kubernetes/dev)
 - Introduction
   - [Overview](tidb-operator-overview.md)
-  - [What's New in v1.4](whats-new-in-v1.4.md)
 - [Get Started](get-started.md)
 - Deploy
   - On Self-Managed Kubernetes
@@ -17,14 +16,14 @@
     - [Access a TiDB Cluster](access-tidb.md)
   - On Public Cloud Kubernetes
     - [Amazon EKS](deploy-on-aws-eks.md)
-    - [GCP GKE](deploy-on-gcp-gke.md)
+    - [Google Cloud GKE](deploy-on-gcp-gke.md)
     - [Azure AKS](deploy-on-azure-aks.md)
     - [Alibaba Cloud ACK](deploy-on-alibaba-cloud.md)
   - [Deploy TiDB on ARM64 Machines](deploy-cluster-on-arm64.md)
   - [Deploy TiFlash to Explore TiDB HTAP](deploy-tiflash.md)
   - Deploy TiDB Across Multiple Kubernetes Clusters
     - [Build Multiple Interconnected AWS EKS Clusters](build-multi-aws-eks.md)
-    - [Build Multiple Interconnected GCP GKE Clusters](build-multi-gcp-gke.md)
+    - [Build Multiple Interconnected GKE Clusters](build-multi-gcp-gke.md)
     - [Deploy TiDB Across Multiple Kubernetes Clusters](deploy-tidb-cluster-across-multiple-kubernetes.md)
   - [Deploy a Heterogeneous TiDB Cluster](deploy-heterogeneous-tidb-cluster.md)
   - [Deploy TiCDC](deploy-ticdc.md)
@@ -125,7 +124,13 @@
   - [Monitoring and Alert on Kubernetes](monitor-kubernetes.md)
   - [PingCAP Clinic Diagnostic Data](clinic-data-collection.md)
 - Release Notes
+  - v1.5
+    - [1.5.0-beta.1](releases/release-1.5.0-beta.1.md)
   - v1.4
+    - [1.4.7](releases/release-1.4.7.md)
+    - [1.4.6](releases/release-1.4.6.md)
+    - [1.4.5](releases/release-1.4.5.md)
+    - [1.4.4](releases/release-1.4.4.md)
     - [1.4.3](releases/release-1.4.3.md)
     - [1.4.2](releases/release-1.4.2.md)
     - [1.4.1](releases/release-1.4.1.md)

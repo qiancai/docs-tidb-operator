@@ -6,15 +6,13 @@ hide_sidebar: true
 hide_commit: true
 ---
 
-<LearningPathContainer platform="tidb-operator" title="TiDB on Kubernetes" subTitle="使用 PingCAP 提供的 TiDB Operator，你可以在公有云或私有部署的 Kubernetes 集群上自动运维 TiDB 集群，实现 TiDB 在 Kubernetes 上的无缝运行。">
+<LearningPathContainer platform="tidb-operator" title="TiDB on Kubernetes" subTitle="使用 PingCAP 提供的 TiDB Operator，你可以在公有云或自托管的 Kubernetes 集群上自动运维 TiDB 集群，实现 TiDB 在 Kubernetes 上的无缝运行。">
 
 <LearningPath label="了解" icon="cloud1">
 
 [TiDB Operator 简介](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/tidb-operator-overview)
 
 [TiDB Operator 架构](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/architecture)
-
-[TiDB Operator v1.4 新特性](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/whats-new-in-v1.4)
 
 [快速上手](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/get-started)
 
@@ -26,7 +24,7 @@ hide_commit: true
 
 [部署到 Amazon EKS](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/deploy-on-aws-eks)
 
-[部署到 GCP GKE](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/deploy-on-gcp-gke)
+[部署到 Google Cloud GKE](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/deploy-on-gcp-gke)
 
 [部署到 Azure AKS](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/deploy-on-azure-aks)
 

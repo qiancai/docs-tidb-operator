@@ -14,7 +14,7 @@ summary: 本文档介绍如何实现跨多个 Kubernetes 集群部署 TiDB 集�
 - 各 Kubernetes 集群上的 TiDB 组件有能力访问集群内和集群间所有 TiDB 组件的 Pod IP。
 - 各 Kubernetes 集群上的 TiDB 组件有能力解析集群内和集群间所有 TiDB 组件的 Pod FQDN。
 
-多个 EKS 或者 GKE 集群网络互通可以参考 [构建多个网络互通的 AWS EKS 集群](build-multi-aws-eks.md) 与 [构建多个网络互通的 GCP GKE 集群](build-multi-gcp-gke.md)。
+多个 EKS 或者 GKE 集群网络互通可以参考 [构建多个网络互通的 AWS EKS 集群](build-multi-aws-eks.md) 与 [构建多个网络互通的 Google Cloud GKE 集群](build-multi-gcp-gke.md)。
 
 ## 支持场景
 
@@ -52,7 +52,7 @@ kind: TidbCluster
 metadata:
   name: "${tc_name_1}"
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   pvReclaimPolicy: Delete
   enableDynamicConfiguration: true
@@ -106,7 +106,7 @@ kind: TidbCluster
 metadata:
   name: "${tc_name_2}"
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   pvReclaimPolicy: Delete
   enableDynamicConfiguration: true
@@ -379,7 +379,7 @@ kind: TidbCluster
 metadata:
   name: "${tc_name_1}"
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   tlsCluster:
    enabled: true
@@ -437,7 +437,7 @@ kind: TidbCluster
 metadata:
   name: "${tc_name_2}"
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   tlsCluster:
    enabled: true

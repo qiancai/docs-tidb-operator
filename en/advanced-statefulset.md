@@ -46,22 +46,22 @@ The [advanced StatefulSet controller](https://github.com/pingcap/advanced-statef
 3. Upgrade TiDB Operator. For details, refer to [Upgrade TiDB Operator](upgrade-tidb-operator.md).
 
 4. After upgrading TiDB Operator, check the AdvancedStatefulSet Controller is deployed by the following command:
-   
+
     {{< copyable "shell-regular" >}}
-    
+
     ```shell
     kubectl get pods -n ${operator-ns} --selector app.kubernetes.io/component=advanced-statefulset-controller
     ```
 
     <details>
     <summary>Expected output</summary>
-    
+
     ```
     NAME                                               READY       STATUS    RESTARTS   AGE
     advanced-statefulset-controller-67885c5dd9-f522h   1/1         Running   0          10s
     ```
-    
-    </details> 
+
+    </details>
 
 > **Note:**
 >
@@ -95,7 +95,7 @@ kind: TidbCluster
 metadata:
   name: asts
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   pvReclaimPolicy: Delete
   pd:
@@ -147,7 +147,7 @@ metadata:
     tikv.tidb.pingcap.com/delete-slots: '[1]'
   name: asts
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   pvReclaimPolicy: Delete
   pd:
@@ -201,7 +201,7 @@ metadata:
     tikv.tidb.pingcap.com/delete-slots: '[]'
   name: asts
 spec:
-  version: v6.5.0
+  version: v7.1.0
   timezone: UTC
   pvReclaimPolicy: Delete
   pd:

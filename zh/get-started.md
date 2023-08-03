@@ -1,10 +1,10 @@
 ---
-title: 快速上手 TiDB Operator
+title: 在 Kubernetes 上快速上手 TiDB
 summary: 介绍如何快速地在 Kubernetes 上使用 TiDB Operator 部署 TiDB 集群
 aliases: ['/docs-cn/tidb-in-kubernetes/dev/get-started/','/docs-cn/dev/tidb-in-kubernetes/deploy-tidb-from-kubernetes-dind/', '/docs-cn/dev/tidb-in-kubernetes/deploy-tidb-from-kubernetes-kind/', '/docs-cn/dev/tidb-in-kubernetes/deploy-tidb-from-kubernetes-minikube/','/docs-cn/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-kind/','/docs-cn/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-minikube/','/zh/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-kind/','/zh/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-gke/','/zh/tidb-in-kubernetes/dev/deploy-tidb-from-kubernetes-minikube']
 ---
 
-# 快速上手 TiDB Operator
+# 在 Kubernetes 上快速上手 TiDB
 
 本文档介绍了如何创建一个简单的 Kubernetes 集群，部署 TiDB Operator，并使用 TiDB Operator 部署 TiDB 集群。
 
@@ -32,7 +32,7 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/get-started/','/docs-cn/dev/tidb-in-k
 - [使用 kind](#方法一使用-kind-创建-kubernetes-集群) 创建在 Docker 中运行的 Kubernetes，这是目前比较通用的部署方式。
 - [使用 minikube](#方法二使用-minikube-创建-kubernetes-集群) 创建在虚拟机中运行的 Kubernetes
 
-你也可以使用 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&cloudshell_tutorial=zh/deploy-tidb-from-kubernetes-gke.md) 在 Google Cloud Platform 的 Google Kubernetes Engine 中部署 Kubernetes 集群。
+你也可以使用 [Google Cloud Shell](https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&cloudshell_tutorial=zh/deploy-tidb-from-kubernetes-gke.md) 在 Google Cloud 的 Google Kubernetes Engine 中部署 Kubernetes 集群。
 
 ### 方法一：使用 kind 创建 Kubernetes 集群
 
@@ -261,7 +261,7 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
     {{< copyable "shell-regular" >}}
 
     ```shell
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.4.3
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.5.0-beta.1
     ```
 
     如果访问 Docker Hub 网速较慢，可以使用阿里云上的镜像：
@@ -269,9 +269,9 @@ customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com
     {{< copyable "shell-regular" >}}
 
     ```
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.4.3 \
-        --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.4.3 \
-        --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.4.3 \
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.5.0-beta.1 \
+        --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.5.0-beta.1 \
+        --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.5.0-beta.1 \
         --set scheduler.kubeSchedulerImageName=registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler
     ```
 
@@ -490,7 +490,7 @@ mysql --comments -h 127.0.0.1 -P 14000 -u root
 ```
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MySQL connection id is 178505
-Server version: 5.7.25-TiDB-v6.5.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+Server version: 5.7.25-TiDB-v7.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
 
 Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 
@@ -539,15 +539,16 @@ mysql> select * from information_schema.tikv_region_status where db_name=databas
 ```sql
 mysql> select tidb_version()\G
 *************************** 1. row ***************************
-         tidb_version(): Release Version: v6.5.0
+         tidb_version(): Release Version: v7.1.0
                 Edition: Community
-        Git Commit Hash: 4a1b2e9fe5b5afb1068c56de47adb07098d768d6
-             Git Branch: heads/refs/tags/v6.5.0
-         UTC Build Time: 2021-11-24 13:32:39
-              GoVersion: go1.16.4
+        Git Commit Hash: 635a4362235e8a3c0043542e629532e3c7bb2756
+             Git Branch: heads/refs/tags/v7.1.0
+         UTC Build Time: 2023-05-30 10:58:57
+              GoVersion: go1.20.3
            Race Enabled: false
-       TiKV Min Version: v3.0.0-60965b006877ca7234adaced7890d7b029ed1306
+       TiKV Min Version: 6.2.0-alpha
 Check Table Before Drop: false
+                  Store: tikv
 1 row in set (0.01 sec)
 ```
 
@@ -637,7 +638,7 @@ Grafana 面板可在 kubectl 所运行的主机上通过 <http://localhost:3000>
 kubectl port-forward --address 0.0.0.0 -n tidb-cluster svc/basic-grafana 3000 > pf3000.out &
 ```
 
-然后通过 <http://${远程服务器IP}:3000> 访问 Grafana。
+然后通过 `http://${远程服务器IP}:3000` 访问 Grafana。
 
 了解更多使用 TiDB Operator 部署 TiDB 集群监控的信息，可以查阅 [TiDB 集群监控与告警](monitor-a-tidb-cluster.md)。
 
@@ -659,7 +660,7 @@ TiDB Dashboard 面板可在 kubectl 所运行的主机上通过 <http://localhos
 kubectl port-forward --address 0.0.0.0 -n tidb-cluster svc/basic-tidb-dashboard-exposed 12333 > pf12333.out &
 ```
 
-然后通过 <http://${远程服务器IP}:12333> 访问 TiDB Dashboard。
+然后通过 `http://${远程服务器IP}:12333` 访问 TiDB Dashboard。
 
 ## 第 5 步：升级 TiDB 集群
 
@@ -734,15 +735,16 @@ mysql --comments -h 127.0.0.1 -P 24000 -u root -e 'select tidb_version()\G'
 
 ```
 *************************** 1. row ***************************
-tidb_version(): Release Version: v6.5.0-alpha-445-g778e188fa
+tidb_version(): Release Version: v7.1.0
 Edition: Community
-Git Commit Hash: 778e188fa7af4f48497ff9e05ca6681bf9a5fa16
-Git Branch: master
-UTC Build Time: 2021-12-17 17:02:49
-GoVersion: go1.16.4
+Git Commit Hash: 635a4362235e8a3c0043542e629532e3c7bb2756
+Git Branch: heads/refs/tags/v7.1.0
+UTC Build Time: 2023-05-30 10:58:57
+GoVersion: go1.20.3
 Race Enabled: false
-TiKV Min Version: v3.0.0-60965b006877ca7234adaced7890d7b029ed1306
+TiKV Min Version: 6.2.0-alpha
 Check Table Before Drop: false
+Store: tikv
 ```
 
 </details>
@@ -841,7 +843,7 @@ minikube delete
 在公有云上部署：
 
 - [在 AWS EKS 上部署 TiDB 集群](deploy-on-aws-eks.md)
-- [在 GCP GKE 上部署 TiDB 集群](deploy-on-gcp-gke.md)
+- [在 Google Cloud GKE 上部署 TiDB 集群](deploy-on-gcp-gke.md)
 - [在 Azure AKS 上部署 TiDB 集群](deploy-on-azure-aks.md)
 - [在阿里云 ACK 上部署 TiDB 集群](deploy-on-alibaba-cloud.md)
 

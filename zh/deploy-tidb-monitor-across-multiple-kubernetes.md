@@ -65,17 +65,17 @@ Push 方式指利用 Prometheus remote-write 的特性，使位于不同 Kuberne
       - name: ${cluster_name}
         namespace: ${cluster_namespace}
       externalLabels:
-        # k8s_clsuter indicates the k8s cluster name, you can change
+        # k8s_cluster indicates the k8s cluster name, you can change
         # the label's name on your own, but you should notice that the
         # "cluster" label has been used by the TiDB metrics already.
         # For more information, please refer to the issue
         # https://github.com/pingcap/tidb-operator/issues/4219.
-        k8s_clsuter: ${kubernetes_cluster_name}
+        k8s_cluster: ${kubernetes_cluster_name}
         # add other meta labels here
         #region: us-east-1
       initializer:
         baseImage: pingcap/tidb-monitor-initializer
-        version: v6.5.0
+        version: v7.1.0
       persistent: true
       storage: 100Gi
       storageClassName: ${storageclass_name}
@@ -149,17 +149,17 @@ Pull 方式是指从不同 Kubernetes 集群的 Prometheus 实例中拉取监控
       - name: ${cluster_name}
         namespace: ${cluster_namespace}
       externalLabels:
-        # k8s_clsuter indicates the k8s cluster name, you can change
+        # k8s_cluster indicates the k8s cluster name, you can change
         # the label's name on your own, but you should notice that the
         # "cluster" label has been used by the TiDB metrics already.
         # For more information, please refer to the issue
         # https://github.com/pingcap/tidb-operator/issues/4219.
-        k8s_clsuter: ${kubernetes_cluster_name}
+        k8s_cluster: ${kubernetes_cluster_name}
         # add other meta labels here
         #region: us-east-1
       initializer:
         baseImage: pingcap/tidb-monitor-initializer
-        version: v6.5.0
+        version: v7.1.0
       persistent: true
       storage: 20Gi
       storageClassName: ${storageclass_name}
@@ -235,17 +235,17 @@ Pull 方式是指从不同 Kubernetes 集群的 Prometheus 实例中拉取监控
       - name: ${cluster_name}
         namespace: ${cluster_namespace}
       externalLabels:
-        # k8s_clsuter indicates the k8s cluster name, you can change
+        # k8s_cluster indicates the k8s cluster name, you can change
         # the label's name on your own, but you should notice that the
         # "cluster" label has been used by the TiDB metrics already.
         # For more information, please refer to the issue
         # https://github.com/pingcap/tidb-operator/issues/4219.
-        k8s_clsuter: ${kubernetes_cluster_name}
+        k8s_cluster: ${kubernetes_cluster_name}
         # add other meta labels here
         #region: us-east-1
       initializer:
         baseImage: pingcap/tidb-monitor-initializer
-        version: v6.5.0
+        version: v7.1.0
       persistent: true
       storage: 20Gi
       storageClassName: ${storageclass_name}
@@ -293,7 +293,7 @@ scrape_configs:
 
     ```shell
     # set tidb version here
-    version=v6.5.0
+    version=v7.1.0
     docker run --rm -i -v ${PWD}/dashboards:/dashboards/ pingcap/tidb-monitor-initializer:${version} && \
     cd dashboards
     ```

@@ -20,10 +20,10 @@ This section introduces the fields in the `Backup` CR.
 
     - When using BR for backup, you can specify the BR version in this field.
         - If the field is not specified or the value is empty, the `pingcap/br:${tikv_version}` image is used for backup by default.
-        - If the BR version is specified in this field, such as `.spec.toolImage: pingcap/br:v6.5.0`, the image of the specified version is used for backup.
+        - If the BR version is specified in this field, such as `.spec.toolImage: pingcap/br:v7.1.0`, the image of the specified version is used for backup.
         - If an image is specified without the version, such as `.spec.toolImage: private/registry/br`, the `private/registry/br:${tikv_version}` image is used for backup.
     - When using Dumpling for backup, you can specify the Dumpling version in this field.
-        - If the Dumpling version is specified in this field, such as `spec.toolImage: pingcap/dumpling:v6.5.0`, the image of the specified version is used for backup.
+        - If the Dumpling version is specified in this field, such as `spec.toolImage: pingcap/dumpling:v7.1.0`, the image of the specified version is used for backup.
         - If the field is not specified, the Dumpling version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](https://github.com/pingcap/tidb-operator/blob/master/images/tidb-backup-manager/Dockerfile) is used for backup by default.
 
 * `.spec.backupType`: the backup type. This field is valid only when you use BR for backup. Currently, the following three types are supported, and this field can be combined with the `.spec.tableFilter` field to configure table filter rules:
@@ -120,6 +120,11 @@ This section introduces the fields in the `Backup` CR.
     > - "!db.table"
     > ```
 
+* `.spec.backoffRetryPolicy`: the retry policy for abnormal failures (such as Kubernetes killing the node due to insufficient resources) of the Job/Pod during the backup. This configuration currently only takes effect on the `snapshot` backup.
+    * `minRetryDuration`: the minimum retry interval after an abnormal failure is found. The retry interval increases with the number of failures. `RetryDuration` = `minRetryDuration` << (`retryNum` -1). The time format is specified in [`func ParseDuration`](https://golang.org/pkg/time/#ParseDuration), and the default value is `300s`.
+    * `maxRetryTimes`: the maximum number of retries. The default value is `2`.
+    * `retryTimeout`: the retry timeout. The timeout starts from the first abnormal failure. The time format is specified in [`func ParseDuration`](https://golang.org/pkg/time/#ParseDuration), and the default value is `30m`.
+
 ### BR fields
 
 * `.spec.br.cluster`: the name of the cluster to be backed up.
@@ -130,7 +135,7 @@ This section introduces the fields in the `Backup` CR.
 * `.spec.br.rateLimit`: the speed limit, in MB/s. If set to `4`, the speed limit is 4 MB/s. The speed limit is not set by default.
 * `.spec.br.checksum`: whether to verify the files after the backup is completed. Defaults to `true`.
 * `.spec.br.timeAgo`: backs up the data before `timeAgo`. If the parameter value is not specified (empty by default), it means backing up the current data. It supports data formats such as `"1.5h"` and `"2h45m"`. See [ParseDuration](https://golang.org/pkg/time/#ParseDuration) for more information.
-* `.spec.br.sendCredToTikv`: whether the BR process passes its AWS, GCP, or Azure permissions to the TiKV process. Defaults to `true`.
+* `.spec.br.sendCredToTikv`: whether the BR process passes its AWS, Google Cloud, or Azure permissions to the TiKV process. Defaults to `true`.
 * `.spec.br.onLine`: whether to enable the [online restore](https://docs.pingcap.com/tidb/stable/use-br-command-line-tool#online-restore-experimental-feature) feature when restoring data.
 * `.spec.br.options`: the extra arguments that BR supports. This field is supported since TiDB Operator v1.1.6. It accepts an array of strings and can be used to specify the last backup timestamp `--lastbackupts` for incremental backup.
 
@@ -182,7 +187,7 @@ This section introduces the fields in the `Backup` CR.
 
 ### GCS fields
 
-* `.spec.gcs.projectId`: the unique identifier of the user project on GCP. To obtain the project ID, refer to [GCP documentation](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
+* `.spec.gcs.projectId`: the unique identifier of the user project on Google Cloud. To obtain the project ID, refer to [Google Cloud documentation](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
 * `.spec.gcs.location`: the location of the GCS bucket. For example, `us-west2`.
 * `.spec.gcs.path`: the storage path of backup files on the remote storage. This field is valid only when the data is backed up using Dumpling or restored using TiDB Dumpling. For example, `gcs://test1-demo1/backup-2019-11-11T16:06:05Z.tgz`.
 * `.spec.gcs.secretName`: the name of the secret that stores the GCS account credential.
@@ -255,12 +260,12 @@ This section introduces the fields in the `Restore` CR.
 * `.spec.metadata.namespace`: the namespace where the `Restore` CR is located.
 * `.spec.toolImage`：the tools image used by `Restore`. TiDB Operator supports this configuration starting from v1.1.9.
 
-    - When using BR for restoring, you can specify the BR version in this field. For example,`spec.toolImage: pingcap/br:v6.5.0`. If not specified, `pingcap/br:${tikv_version}` is used for restoring by default.
-    - When using Lightning for restoring, you can specify the Lightning version in this field. For example, `spec.toolImage: pingcap/lightning:v6.5.0`. If not specified, the Lightning version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](https://github.com/pingcap/tidb-operator/blob/master/images/tidb-backup-manager/Dockerfile) is used for restoring by default.
+    - When using BR for restoring, you can specify the BR version in this field. For example,`spec.toolImage: pingcap/br:v7.1.0`. If not specified, `pingcap/br:${tikv_version}` is used for restoring by default.
+    - When using Lightning for restoring, you can specify the Lightning version in this field. For example, `spec.toolImage: pingcap/lightning:v7.1.0`. If not specified, the Lightning version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](https://github.com/pingcap/tidb-operator/blob/master/images/tidb-backup-manager/Dockerfile) is used for restoring by default.
 
 * `.spec.backupType`: the restore type. This field is valid only when you use BR to restore data. Currently, the following three types are supported, and this field can be combined with the `.spec.tableFilter` field to configure table filter rules:
     * `full`: restore all databases in a TiDB cluster.
-    * `db`: restore a specifed database in a TiDB cluster.
+    * `db`: restore a specified database in a TiDB cluster.
     * `table`: restore a specified table in a TiDB cluster.
 
 * `.spec.tikvGCLifeTime`: the temporary `tikv_gc_life_time` setting during the restore, which defaults to `72h`.
@@ -336,13 +341,18 @@ This section introduces the fields in the `Restore` CR.
 
 ## BackupSchedule CR fields
 
-The `backupSchedule` configuration consists of two parts. One is `backupTemplate`, and the other is the unique configuration of `backupSchedule`.
+The `backupSchedule` configuration consists of three parts: the configuration of the snapshot backup `backupTemplate`, the configuration of the log backup `logBackupTemplate`, and the unique configuration of `backupSchedule`.
 
-`backupTemplate` specifies the configuration related to the cluster and remote storage, which is the same as the `spec` configuration of [the `Backup` CR](#backup-cr-fields).
+* `backupTemplate`: the configuration of the snapshot backup. Specifies the configuration related to the cluster and remote storage of the snapshot backup, which is the same as the `spec` configuration of [the `Backup` CR](#backup-cr-fields).
+* `logBackupTemplate`: the configuration of the log backup. Specifies the configuration related to the cluster and remote storage of the log backup, which is the same as the `spec` configuration of [the `Backup` CR](#backup-cr-fields). The log backup is created and deleted along with `backupSchedule` and recycled according to `.spec.maxReservedTime`. The log backup name is saved in `status.logBackup`.
 
-The unique configuration items of `backupSchedule` are as follows:
+    > **Note:**
+    >
+    > Before you delete the log backup data, you need to stop the log backup task to avoid resource waste or the inability to restart the log backup task in the future because the log backup task in TiKV is not stopped.
 
-* `.spec.maxBackups`: a backup retention policy, which determines the maximum number of backup files to be retained. When the number of backup files exceeds this value, the outdated backup file will be deleted. If you set this field to `0`, all backup items are retained.
-* `.spec.maxReservedTime`: a backup retention policy based on time. For example, if you set the value of this field to `24h`, only backup files within the recent 24 hours are retained. All backup files older than this value are deleted. For the time format, refer to [`func ParseDuration`](https://golang.org/pkg/time/#ParseDuration). If you have set `.spec.maxBackups` and `.spec.maxReservedTime` at the same time, the latter takes effect.
-* `.spec.schedule`: the time scheduling format of Cron. Refer to [Cron](https://en.wikipedia.org/wiki/Cron) for details.
-* `.spec.pause`: `false` by default. If this field is set to `true`, the scheduled scheduling is paused. In this situation, the backup operation will not be performed even if the scheduling time point is reached. During this pause, the backup garbage collection runs normally. If you change `true` to `false`, the scheduled snapshot backup process is restarted.
+* The unique configuration items of `backupSchedule` are as follows:
+
+    * `.spec.maxBackups`: a backup retention policy, which determines the maximum number of backup files to be retained. When the number of backup files exceeds this value, the outdated backup file will be deleted. If you set this field to `0`, all backup items are retained.
+    * `.spec.maxReservedTime`: a backup retention policy based on time. For example, if you set the value of this field to `24h`, only backup files within the recent 24 hours are retained. All backup files older than this value are deleted. For the time format, refer to [`func ParseDuration`](https://golang.org/pkg/time/#ParseDuration). If you have set `.spec.maxBackups` and `.spec.maxReservedTime` at the same time, the latter takes effect.
+    * `.spec.schedule`: the time scheduling format of Cron. Refer to [Cron](https://en.wikipedia.org/wiki/Cron) for details.
+    * `.spec.pause`: `false` by default. If this field is set to `true`, the scheduled scheduling is paused. In this situation, the backup operation will not be performed even if the scheduling time point is reached. During this pause, the backup garbage collection runs normally. If you change `true` to `false`, the scheduled snapshot backup process is restarted. Because currently, log backup does not support pause, this configuration does not take effect for log backup.
