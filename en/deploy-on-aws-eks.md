@@ -54,6 +54,8 @@ kind: ClusterConfig
 metadata:
   name: ${clusterName}
   region: ap-northeast-1
+addons:
+  - name: aws-ebs-csi-driver
 
 nodeGroups:
   - name: admin
@@ -61,7 +63,9 @@ nodeGroups:
     privateNetworking: true
     labels:
       dedicated: admin
-
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: tidb-1a
     desiredCapacity: 1
     privateNetworking: true
@@ -71,6 +75,9 @@ nodeGroups:
       dedicated: tidb
     taints:
       dedicated: tidb:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: tidb-1d
     desiredCapacity: 0
     privateNetworking: true
@@ -80,6 +87,9 @@ nodeGroups:
       dedicated: tidb
     taints:
       dedicated: tidb:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: tidb-1c
     desiredCapacity: 1
     privateNetworking: true
@@ -89,7 +99,9 @@ nodeGroups:
       dedicated: tidb
     taints:
       dedicated: tidb:NoSchedule
-
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: pd-1a
     desiredCapacity: 1
     privateNetworking: true
@@ -99,6 +111,9 @@ nodeGroups:
       dedicated: pd
     taints:
       dedicated: pd:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: pd-1d
     desiredCapacity: 1
     privateNetworking: true
@@ -108,6 +123,9 @@ nodeGroups:
       dedicated: pd
     taints:
       dedicated: pd:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: pd-1c
     desiredCapacity: 1
     privateNetworking: true
@@ -117,7 +135,9 @@ nodeGroups:
       dedicated: pd
     taints:
       dedicated: pd:NoSchedule
-
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: tikv-1a
     desiredCapacity: 1
     privateNetworking: true
@@ -127,6 +147,9 @@ nodeGroups:
       dedicated: tikv
     taints:
       dedicated: tikv:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: tikv-1d
     desiredCapacity: 1
     privateNetworking: true
@@ -136,6 +159,9 @@ nodeGroups:
       dedicated: tikv
     taints:
       dedicated: tikv:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: tikv-1c
     desiredCapacity: 1
     privateNetworking: true
@@ -145,6 +171,9 @@ nodeGroups:
       dedicated: tikv
     taints:
       dedicated: tikv:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
 ```
 
 By default, only two TiDB nodes are required, so you can set the `desiredCapacity` of the `tidb-1d` node group to `0`. You can scale out this node group any time if necessary.
@@ -187,7 +216,8 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 # ...
 mountOptions:
-- nodelalloc,noatime
+  - nodelalloc
+  - noatime
 ```
 
 For more information on the mount options, see [TiDB Environment and System Configuration Check](https://docs.pingcap.com/tidb/stable/check-before-deployment#mount-the-data-disk-ext4-filesystem-with-options-on-the-target-machines-that-deploy-tikv).
@@ -230,7 +260,8 @@ The following example shows how to create and configure a StorageClass for the `
       iops: "4000"
       throughput: "400"
     mountOptions:
-    - nodelalloc,noatime
+      - nodelalloc
+      - noatime
     ```
 
 4. In the TidbCluster YAML file, configure `gp3` in the `storageClassName` field. For example:
@@ -249,7 +280,8 @@ The following example shows how to create and configure a StorageClass for the `
     apiVersion: storage.k8s.io/v1
     # ...
     mountOptions:
-    - nodelalloc,noatime
+      - nodelalloc
+      - noatime
     ```
 
     For more information on the mount options, see [TiDB Environment and System Configuration Check](https://docs.pingcap.com/tidb/stable/check-before-deployment#mount-the-data-disk-ext4-filesystem-with-options-on-the-target-machines-that-deploy-tikv).
@@ -284,6 +316,9 @@ The following `c5d.4xlarge` example shows how to configure StorageClass for the 
               dedicated: tikv
             taints:
               dedicated: tikv:NoSchedule
+            iam:
+              withAddonPolicies:
+                ebs: true
             ...
         ```
 
@@ -461,7 +496,7 @@ After the bastion host is created, you can connect to the bastion host via SSH a
     $ mysql --comments -h abfc623004ccb4cc3b363f3f37475af1-9774d22c27310bc1.elb.us-west-2.amazonaws.com -P 4000 -u root
     Welcome to the MariaDB monitor.  Commands end with ; or \g.
     Your MySQL connection id is 1189
-    Server version: 5.7.25-TiDB-v7.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+    Server version: 8.0.11-TiDB-v7.5.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 8.0 compatible
 
     Copyright (c) 2000, 2022, Oracle and/or its affiliates.
 
@@ -546,7 +581,7 @@ eksctl scale nodegroup --cluster ${clusterName} --name tikv-1c --nodes 2 --nodes
 eksctl scale nodegroup --cluster ${clusterName} --name tikv-1d --nodes 2 --nodes-min 2 --nodes-max 2
 ```
 
-For more information on managing node groups, refer to [`eksctl` documentation](https://eksctl.io/usage/managing-nodegroups/).
+For more information on managing node groups, refer to [`eksctl` documentation](https://eksctl.io/usage/nodegroups/).
 
 ### Scale out TiDB components
 
@@ -573,6 +608,9 @@ In the configuration file of eksctl (`cluster.yaml`), add the following two item
       dedicated: tiflash
     taints:
       dedicated: tiflash:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: tiflash-1d
     desiredCapacity: 1
     privateNetworking: true
@@ -581,6 +619,9 @@ In the configuration file of eksctl (`cluster.yaml`), add the following two item
       dedicated: tiflash
     taints:
       dedicated: tiflash:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: tiflash-1c
     desiredCapacity: 1
     privateNetworking: true
@@ -589,7 +630,9 @@ In the configuration file of eksctl (`cluster.yaml`), add the following two item
       dedicated: tiflash
     taints:
       dedicated: tiflash:NoSchedule
-
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: ticdc-1a
     desiredCapacity: 1
     privateNetworking: true
@@ -598,6 +641,9 @@ In the configuration file of eksctl (`cluster.yaml`), add the following two item
       dedicated: ticdc
     taints:
       dedicated: ticdc:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: ticdc-1d
     desiredCapacity: 1
     privateNetworking: true
@@ -606,6 +652,9 @@ In the configuration file of eksctl (`cluster.yaml`), add the following two item
       dedicated: ticdc
     taints:
       dedicated: ticdc:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
   - name: ticdc-1c
     desiredCapacity: 1
     privateNetworking: true
@@ -614,6 +663,9 @@ In the configuration file of eksctl (`cluster.yaml`), add the following two item
       dedicated: ticdc
     taints:
       dedicated: ticdc:NoSchedule
+    iam:
+      withAddonPolicies:
+        ebs: true
 ```
 
 Depending on the EKS cluster status, use different commands:

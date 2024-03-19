@@ -234,7 +234,7 @@ To install TiDB Operator, you can use [Helm 3](https://helm.sh/docs/intro/instal
 3. Install TiDB Operator:
 
     ```shell
-    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.5.0-beta.1
+    helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.5.2
     ```
 
     <details>
@@ -462,14 +462,13 @@ APPROXIMATE_KEYS: 0
 ```sql
 mysql> select tidb_version()\G
 *************************** 1. row ***************************
-         tidb_version(): Release Version: v7.1.0
+         tidb_version(): Release Version: v7.5.0
                 Edition: Community
-        Git Commit Hash: 635a4362235e8a3c0043542e629532e3c7bb2756
-             Git Branch: heads/refs/tags/v7.1.0
-         UTC Build Time: 2023-05-30 10:58:57
-              GoVersion: go1.20.3
+        Git Commit Hash: 700beafa79844b7b48dcba1c452ea3ff49d8f271
+             Git Branch: heads/refs/tags/v7.5.0
+         UTC Build Time: 2023-11-10 14:38:24
+              GoVersion: go1.21.3
            Race Enabled: false
-       TiKV Min Version: 6.2.0-alpha
 Check Table Before Drop: false
                   Store: tikv
 1 row in set (0.01 sec)
@@ -652,14 +651,13 @@ Note that `nightly` is not a fixed version and the version might vary depending 
 
 ```
 *************************** 1. row ***************************
-tidb_version(): Release Version: v7.1.0
+tidb_version(): Release Version: v7.5.0
 Edition: Community
-Git Commit Hash: 635a4362235e8a3c0043542e629532e3c7bb2756
-Git Branch: heads/refs/tags/v7.1.0
-UTC Build Time: 2023-05-30 10:58:57
-GoVersion: go1.20.3
+Git Commit Hash: 700beafa79844b7b48dcba1c452ea3ff49d8f271
+Git Branch: heads/refs/tags/v7.5.0
+UTC Build Time: 2023-11-10 14:38:24
+GoVersion: go1.21.3
 Race Enabled: false
-TiKV Min Version: 6.2.0-alpha
 Check Table Before Drop: false
 Store: tikv
 ```

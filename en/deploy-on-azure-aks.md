@@ -205,7 +205,8 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 # ...
 mountOptions:
-- nodelalloc,noatime
+  - nodelalloc
+  - noatime
 ```
 
 ## Deploy TiDB Operator
@@ -342,7 +343,7 @@ After access to the internal host via SSH, you can access the TiDB cluster throu
     $ mysql --comments -h 20.240.0.7 -P 4000 -u root
     Welcome to the MariaDB monitor.  Commands end with ; or \g.
     Your MySQL connection id is 1189
-    Server version: 5.7.25-TiDB-v7.1.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+    Server version: 8.0.11-TiDB-v7.5.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 8.0 compatible
 
     Copyright (c) 2000, 2022, Oracle and/or its affiliates.
 
@@ -547,7 +548,8 @@ Azure disks support multiple volume types. Among them, `UltraSSD` delivers low l
     allowVolumeExpansion: true
     volumeBindingMode: WaitForFirstConsumer
     mountOptions:
-    - nodelalloc,noatime
+      - nodelalloc
+      - noatime
     ```
 
     You can add more [Driver Parameters](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/driver-parameters.md) as required.

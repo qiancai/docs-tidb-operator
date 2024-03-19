@@ -41,9 +41,9 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/configure-a-tidb-cluster/','/zh/tidb-
 
 相关参数的格式如下：
 
-- `spec.version`，格式为 `imageTag`，例如 `v7.1.0`
+- `spec.version`，格式为 `imageTag`，例如 `v7.5.0`
 - `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.baseImage`，格式为 `imageName`，例如 `pingcap/tidb`
-- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v7.1.0`
+- `spec.<pd/tidb/tikv/pump/tiflash/ticdc>.version`，格式为 `imageTag`，例如 `v7.5.0`
 
 ### 推荐配置
 
@@ -223,7 +223,7 @@ TiDB Operator 支持为 PD、TiDB、TiKV、TiCDC 挂载多块 PV，可以用于�
 
 ### HostNetwork
 
-PD、TiKV、TiDB、TiFlash、TiCDC 及 Pump 支持配置 Pod 使用宿主机上的网络命名空间 [`HostNetwork`](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy)。可通过配置 `spec.hostNetwork: true` 为所有受支持的组件开启，或通过为特定组件配置 `hostNetwork: true` 为单个或多个组件开启。
+PD、TiKV、TiDB、TiFlash、TiProxy、TiCDC 及 Pump 支持配置 Pod 使用宿主机上的网络命名空间 [`HostNetwork`](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy)。可通过配置 `spec.hostNetwork: true` 为所有受支持的组件开启，或通过为特定组件配置 `hostNetwork: true` 为单个或多个组件开启。
 
 ### Discovery
 
@@ -250,6 +250,19 @@ spec:
 > **注意：**
 >
 > 如果 Kubernetes 集群节点个数少于 3 个，将会导致有一个 PD Pod 处于 Pending 状态，而 TiKV 和 TiDB Pod 也都不会被创建。Kubernetes 集群节点个数少于 3 个时，为了使 TiDB 集群能启动起来，可以将默认部署的 PD Pod 个数减小到 1 个。
+
+#### 部署 TiProxy
+
+部署方法与 PD 一致。此外，还需要修改 `spec.tiproxy` 来手动指定 TiProxy 组件的数量。
+
+```yaml
+  tiproxy:
+    baseImage: pingcap/tiproxy
+    replicas: 3
+    config:
+```
+
+部署 TiProxy 时，还需要给 TiDB 配置额外参数，详细的配置步骤见[为已有 TiDB 集群部署负载均衡 TiProxy](deploy-tiproxy.md)。
 
 #### 部署 TiFlash
 
@@ -310,7 +323,7 @@ TiFlash 支持挂载多个 PV，如果要为 TiFlash 配置多个 PV，可以在
 
 ### 配置 TiDB 组件
 
-本节介绍如何配置 TiDB/TiKV/PD/TiFlash/TiCDC 的配置选项。
+本节介绍如何配置 TiDB/TiKV/PD/TiProxy/TiFlash/TiCDC 的配置选项。
 
 #### 配置 TiDB 配置参数
 
@@ -367,6 +380,20 @@ spec:
 >
 > - 为了兼容 `helm` 部署，如果你是通过 CR 文件部署 TiDB 集群，即使你不设置 Config 配置，也需要保证 `Config: {}` 的设置，从而避免 PD 组件无法正常启动。
 > - PD 部分配置项在首次启动成功后会持久化到 etcd 中且后续将以 etcd 中的配置为准。因此 PD 在首次启动后，这些配置项将无法再通过配置参数来进行修改，而需要使用 SQL、pd-ctl 或 PD server API 来动态进行修改。目前，[在线修改 PD 配置](https://docs.pingcap.com/zh/tidb/stable/dynamic-config#在线修改-pd-配置)文档中所列的配置项中，除 `log.level` 外，其他配置项在 PD 首次启动之后均不再支持通过配置参数进行修改。
+
+#### 配置 TiProxy 配置参数
+
+你可以通过 TidbCluster CR 的 `spec.tiproxy.config` 来配置 TiProxy 配置参数。
+
+```yaml
+spec:
+  tiproxy:
+    config: |
+      [log]
+      level = "info"
+```
+
+获取所有可以配置的 TiProxy 配置参数，请参考 [TiProxy 配置文档](https://docs.pingcap.com/zh/tidb/v7.6/tiproxy-configuration)。
 
 #### 配置 TiFlash 配置参数
 
@@ -617,6 +644,8 @@ spec:
 
 访问 [Kubernetes Service 文档](https://kubernetes.io/docs/concepts/services-networking/service/)，了解更多 Service 特性以及云平台 Load Balancer 支持。
 
+若指定了 TiProxy，也会自动创建 `tiproxy-api` 和 `tiproxy-sql` 服务供使用。
+
 ### IPv6 支持
 
 TiDB 自 v6.5.1 起支持使用 IPv6 地址进行所有网络连接。如果你使用 v1.4.3 或以上版本的 TiDB Operator 部署 TiDB，你可以通过配置 `spec.preferIPv6` 为 `ture` 来部署监听 IPv6 地址的 TiDB 集群。
@@ -757,7 +786,7 @@ affinity:
 如需使用 `topologySpreadConstraints`，需要满足以下条件：
 
 * Kubernetes 集群使用 `default-scheduler`，而不是 `tidb-scheduler`。详情可以参考 [tidb-scheduler 与 default-scheduler](tidb-scheduler.md#tidb-scheduler-与-default-scheduler)。
-* Kubernetes 集群开启 `EvenPodsSpread` feature gate。如果 Kubernetes 版本低于 v1.16 或集群未开启 `EvenPodsSpread` feature gate，`topologySpreadConstraints` 的配置将不会生效。
+* 如果 Kubernetes 版本在 v1.16 或 v1.21 之间，需要开启 `EvenPodsSpread` feature gate。如果 Kubernetes 版本低于 v1.16 或集群未开启 `EvenPodsSpread` feature gate，`topologySpreadConstraints` 的配置将不会生效。如果 Kubernetes 版本为 v1.22 或更高版本，可忽略该条件。
 
 `topologySpreadConstraints` 可以设置在整个集群级别 (`spec.topologySpreadConstraints`) 来配置所有组件或者设置在组件级别 (例如 `spec.tidb.topologySpreadConstraints`) 来配置特定的组件。
 
