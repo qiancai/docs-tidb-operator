@@ -13,7 +13,8 @@ TiDB Operator 与适用的 TiDB 版本的对应关系如下：
 | TiDB 版本 | 适用的 TiDB Operator 版本 |
 |:---|:---|
 | dev               | dev                 |
-| TiDB >= 7.1       | 1.5（推荐），1.4 |
+| TiDB >= 8.0       | 1.6（推荐），1.5 |
+| 7.1 <= TiDB < 8.0 | 1.5（推荐），1.4 |
 | 6.5 <= TiDB < 7.1 | 1.5, 1.4（推荐），1.3     |
 | 5.4 <= TiDB < 6.5 | 1.4, 1.3（推荐）   |
 | 5.1 <= TiDB < 5.4 | 1.4，1.3（推荐），1.2      |
@@ -37,7 +38,6 @@ TiDB Operator 提供了多种方式来部署 Kubernetes 上的 TiDB 集群：
         - [在 AWS EKS 上部署 TiDB 集群](deploy-on-aws-eks.md)
         - [在 Google Cloud GKE 上部署 TiDB 集群](deploy-on-gcp-gke.md)
         - [在 Azure AKS 上部署 TiDB 集群](deploy-on-azure-aks.md)
-        - [在阿里云 ACK 上部署 TiDB 集群](deploy-on-alibaba-cloud.md)
 
     - 在自托管的 Kubernetes 集群中部署 TiDB 集群：
 

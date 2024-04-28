@@ -4,7 +4,6 @@
 - [TiDB on Kubernetes Docs](https://docs.pingcap.com/tidb-in-kubernetes/dev)
 - Introduction
   - [Overview](tidb-operator-overview.md)
-  - [What's New in v1.5](whats-new-in-v1.5.md)
 - [Get Started](get-started.md)
 - Deploy
   - On Self-Managed Kubernetes
@@ -19,7 +18,6 @@
     - [Amazon EKS](deploy-on-aws-eks.md)
     - [Google Cloud GKE](deploy-on-gcp-gke.md)
     - [Azure AKS](deploy-on-azure-aks.md)
-    - [Alibaba Cloud ACK](deploy-on-alibaba-cloud.md)
   - [Deploy TiDB on ARM64 Machines](deploy-cluster-on-arm64.md)
   - [Deploy TiFlash to Explore TiDB HTAP](deploy-tiflash.md)
   - [Deploy TiProxy Load Balancer](deploy-tiproxy.md)
@@ -114,7 +112,7 @@
     - [Advanced StatefulSet Controller](advanced-statefulset.md)
     - [Admission Controller](enable-admission-webhook.md)
   - [Sysbench Performance Test](benchmark-sysbench.md)
-  - [API References](https://github.com/pingcap/tidb-operator/blob/master/docs/api-references/docs.md)
+  - [API References](https://github.com/pingcap/tidb-operator/blob/v1.6.0-beta.1/docs/api-references/docs.md)
   - [Cheat Sheet](cheat-sheet.md)
   - [Required RBAC Rules](tidb-operator-rbac.md)
   - Tools
@@ -125,7 +123,10 @@
   - [Monitoring and Alert on Kubernetes](monitor-kubernetes.md)
   - [PingCAP Clinic Diagnostic Data](clinic-data-collection.md)
 - Release Notes
+  - v1.6
+    - [1.6.0-beta.1](releases/release-1.6.0-beta.1.md)
   - v1.5
+    - [1.5.3](releases/release-1.5.3.md)
     - [1.5.2](releases/release-1.5.2.md)
     - [1.5.1](releases/release-1.5.1.md)
     - [1.5 GA](releases/release-1.5.0.md)

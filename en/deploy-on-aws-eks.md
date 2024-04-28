@@ -32,9 +32,9 @@ To verify whether AWS CLI is configured correctly, run the `aws configure list` 
 ## Recommended instance types and storage
 
 - Instance types: to gain better performance, the following is recommended:
-    - PD nodes: `c5.xlarge`
-    - TiDB nodes: `c5.4xlarge`
-    - TiKV or TiFlash nodes: `m5.4xlarge`
+    - PD nodes: `c7g.xlarge`
+    - TiDB nodes: `c7g.4xlarge`
+    - TiKV or TiFlash nodes: `m7g.4xlarge`
 - Storage: Because AWS supports the [EBS `gp3`](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/general-purpose.html#gp3-ebs-volume-type) volume type, it is recommended to use EBS `gp3`. For `gp3` provisioning, the following is recommended:
     - TiKV: 400 MiB/s, 4000 IOPS
     - TiFlash: 625 MiB/s, 6000 IOPS
@@ -106,7 +106,7 @@ nodeGroups:
     desiredCapacity: 1
     privateNetworking: true
     availabilityZones: ["ap-northeast-1a"]
-    instanceType: c5.xlarge
+    instanceType: c7g.xlarge
     labels:
       dedicated: pd
     taints:
@@ -118,7 +118,7 @@ nodeGroups:
     desiredCapacity: 1
     privateNetworking: true
     availabilityZones: ["ap-northeast-1d"]
-    instanceType: c5.xlarge
+    instanceType: c7g.xlarge
     labels:
       dedicated: pd
     taints:
@@ -130,7 +130,7 @@ nodeGroups:
     desiredCapacity: 1
     privateNetworking: true
     availabilityZones: ["ap-northeast-1c"]
-    instanceType: c5.xlarge
+    instanceType: c7g.xlarge
     labels:
       dedicated: pd
     taints:
@@ -341,7 +341,7 @@ The following `c5d.4xlarge` example shows how to configure StorageClass for the 
 
     2. [Mount the local storage](https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner/blob/master/docs/operations.md#use-a-whole-disk-as-a-filesystem-pv) to the `/mnt/ssd` directory.
 
-    3. According to the mounting configuration, modify the [local-volume-provisioner.yaml](https://raw.githubusercontent.com/pingcap/tidb-operator/master/manifests/eks/local-volume-provisioner.yaml) file.
+    3. According to the mounting configuration, modify the [local-volume-provisioner.yaml](https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.0-beta.1/manifests/eks/local-volume-provisioner.yaml) file.
 
     4. Deploy and create a `local-storage` storage class using the modified `local-volume-provisioner.yaml` file.
 
@@ -386,9 +386,9 @@ First, download the sample `TidbCluster` and `TidbMonitor` configuration files:
 {{< copyable "shell-regular" >}}
 
 ```shell
-curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/aws/tidb-cluster.yaml && \
-curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/aws/tidb-monitor.yaml && \
-curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/aws/tidb-dashboard.yaml
+curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.0-beta.1/examples/aws/tidb-cluster.yaml && \
+curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.0-beta.1/examples/aws/tidb-monitor.yaml && \
+curl -O https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.0-beta.1/examples/aws/tidb-dashboard.yaml
 ```
 
 Refer to [configure the TiDB cluster](configure-a-tidb-cluster.md) to further customize and configure the CR before applying.
@@ -496,7 +496,7 @@ After the bastion host is created, you can connect to the bastion host via SSH a
     $ mysql --comments -h abfc623004ccb4cc3b363f3f37475af1-9774d22c27310bc1.elb.us-west-2.amazonaws.com -P 4000 -u root
     Welcome to the MariaDB monitor.  Commands end with ; or \g.
     Your MySQL connection id is 1189
-    Server version: 8.0.11-TiDB-v7.5.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 8.0 compatible
+    Server version: 8.0.11-TiDB-v8.0.0 TiDB Server (Apache License 2.0) Community Edition, MySQL 8.0 compatible
 
     Copyright (c) 2000, 2022, Oracle and/or its affiliates.
 
@@ -720,4 +720,4 @@ Depending on the EKS cluster status, use different commands:
 
 Finally, execute `kubectl -n tidb-cluster apply -f tidb-cluster.yaml` to update the TiDB cluster configuration.
 
-For detailed CR configuration, refer to [API references](https://github.com/pingcap/tidb-operator/blob/master/docs/api-references/docs.md) and [Configure a TiDB Cluster](configure-a-tidb-cluster.md).
+For detailed CR configuration, refer to [API references](https://github.com/pingcap/tidb-operator/blob/v1.6.0-beta.1/docs/api-references/docs.md) and [Configure a TiDB Cluster](configure-a-tidb-cluster.md).

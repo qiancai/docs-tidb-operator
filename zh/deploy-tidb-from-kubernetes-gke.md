@@ -94,19 +94,15 @@ kubectl get nodes
 TiDB Operator 使用 [Custom Resource Definition (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#customresourcedefinitions) 扩展 Kubernetes，所以要使用 TiDB Operator，必须先创建 `TidbCluster` 等各种自定义资源类型：
 
 ```shell
-kubectl create -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/manifests/crd.yaml && \
+kubectl create -f https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.0-beta.1/manifests/crd.yaml && \
 kubectl get crd tidbclusters.pingcap.com
 ```
-
-> **注意：**
->
-> 对于 Kubernetes 1.16 之前的版本，Kubernetes 仅支持 v1beta1 版本的 CRD，你需要将上述命令中的 `crd.yaml` 修改为 `crd_v1beta1.yaml`。
 
 创建 `TidbCluster` 自定义资源类型后，接下来在 Kubernetes 集群上安装 TiDB Operator。
 
 ```shell
 kubectl create namespace tidb-admin
-helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.5.2
+helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.6.0-beta.1
 kubectl get po -n tidb-admin -l app.kubernetes.io/name=tidb-operator
 ```
 
@@ -123,13 +119,13 @@ kubectl get po -n tidb-admin -l app.kubernetes.io/name=tidb-operator
 2. 部署 TiDB 集群：
 
     ``` shell
-    kubectl apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic/tidb-cluster.yaml -n demo
+    kubectl apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.0-beta.1/examples/basic/tidb-cluster.yaml -n demo
     ```
 
 3. 部署 TiDB 集群监控：
 
     ``` shell
-    kubectl apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic/tidb-monitor.yaml -n demo
+    kubectl apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.0-beta.1/examples/basic/tidb-monitor.yaml -n demo
     ```
 
 4. 通过下面命令查看 Pod 状态：

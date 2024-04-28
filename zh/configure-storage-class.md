@@ -34,7 +34,7 @@ PD 同样借助 Raft 实现了数据复制，但作为存储集群元信息的�
 
 ## 网络 PV 配置
 
-Kubernetes 1.11 及以上的版本支持[网络 PV 的动态扩容](https://kubernetes.io/blog/2018/07/12/resizing-persistent-volumes-using-kubernetes/)，但用户需要为相应的 `StorageClass` 开启动态扩容支持。
+为相应的 `StorageClass` 开启动态扩容支持。
 
 {{< copyable "shell-regular" >}}
 
@@ -103,7 +103,7 @@ Kubernetes 当前支持静态分配的本地存储。可使用 [local-static-pro
     {{< copyable "shell-regular" >}}
 
     ```shell
-    wget https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/local-pv/local-volume-provisioner.yaml
+    wget https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.0-beta.1/examples/local-pv/local-volume-provisioner.yaml
     ```
 
 2. 如果你使用的发现路径与[第 1 步：准备本地存储](#第-1-步准备本地存储)中的示例一致，可跳过这一步。如果你使用与上一步中不同路径的发现目录，需要修改 ConfigMap 和 DaemonSet 定义。

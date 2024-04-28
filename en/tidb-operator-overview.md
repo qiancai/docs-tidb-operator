@@ -13,7 +13,8 @@ The corresponding relationship between TiDB Operator and TiDB versions is as fol
 | TiDB versions | Compatible TiDB Operator versions |
 |:---|:---|
 | dev               | dev                 |
-| TiDB >= 7.1       | 1.5 (Recommended), 1.4 |
+| TiDB >= 8.0       | 1.6 (Recommended), 1.5 |
+| 7.1 <= TiDB < 8.0 | 1.5 (Recommended), 1.4 |
 | 6.5 <= TiDB < 7.1 | 1.5, 1.4 (Recommended), 1.3 |
 | 5.4 <= TiDB < 6.5 | 1.4, 1.3 (Recommended)   |
 | 5.1 <= TiDB < 5.4 | 1.4, 1.3 (Recommended), 1.2      |
@@ -34,7 +35,6 @@ TiDB Operator provides several ways to deploy TiDB clusters on Kubernetes:
         - [Deploy TiDB on AWS EKS](deploy-on-aws-eks.md)
         - [Deploy TiDB on Google Cloud GKE](deploy-on-gcp-gke.md)
         - [Deploy TiDB on Azure AKS](deploy-on-azure-aks.md)
-        - [Deploy TiDB on Alibaba Cloud ACK](deploy-on-alibaba-cloud.md)
 
     - In an existing Kubernetes cluster:
 
