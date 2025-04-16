@@ -80,57 +80,61 @@ jobs:
         id: diff
         run: |
           echo "Getting PR diff to check file paths..."
-          
-          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH" || jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
-          
-          if [[ -n "$PR_NUMBER" ]]; then
+          echo "Event name: ${{ github.event_name }}"
+
+          # For debugging
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Workflow triggered manually by workflow_dispatch"
+            # For workflow_dispatch, we need to check if we're on a PR branch
+            if [[ "${{ github.ref }}" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
+              PR_NUMBER="${BASH_REMATCH[1]}"
+              echo "Extracted PR number from github.ref: $PR_NUMBER"
+            else
+              echo "Not running on a PR branch: ${{ github.ref }}"
+              # Set default counts for workflow_dispatch not on PR branch
+              echo "zh_files_count=1" >> $GITHUB_OUTPUT
+              echo "en_files_count=1" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          else
+            # For issue_comment event
+            PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH" || jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+            echo "Extracted PR number from event path: $PR_NUMBER"
+          fi
+
+          if [[ -n "$PR_NUMBER" && "$PR_NUMBER" != "null" ]]; then
+            echo "Using PR number: $PR_NUMBER"
             # Get the list of changed files
             FILES=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json files --jq '.files[].path')
-            
+
             # Count files in zh/ and en/ directories
-            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/")
-            EN_COUNT=$(echo "$FILES" | grep -c "^en/")
-            
+            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
+            EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
+
             echo "Changed files in PR #$PR_NUMBER:"
             echo "Files in zh/: $ZH_COUNT"
             echo "Files in en/: $EN_COUNT"
-            
+
             echo "zh_files_count=$ZH_COUNT" >> $GITHUB_OUTPUT
             echo "en_files_count=$EN_COUNT" >> $GITHUB_OUTPUT
           else
-            echo "Could not determine PR number, setting defaults"
-            echo "zh_files_count=0" >> $GITHUB_OUTPUT
-            echo "en_files_count=0" >> $GITHUB_OUTPUT
+            echo "Could not determine PR number, setting defaults for review"
+            # Set default counts to trigger both reviewers for testing
+            echo "zh_files_count=1" >> $GITHUB_OUTPUT
+            echo "en_files_count=1" >> $GITHUB_OUTPUT
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # Upload repository as an artifact to be used by downstream jobs
-      - name: Upload Repository
-        uses: actions/upload-artifact@v3
-        with:
-          name: repository
-          path: .
-          retention-days: 1
 
   review-zh:
     needs: prepare
     if: needs.prepare.outputs.zh_files_count > 0
     runs-on: ubuntu-latest
     steps:
-      # Download repository from artifact instead of checking out again
-      - name: Download Repository
-        uses: actions/download-artifact@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
         with:
-          name: repository
-          path: .
-      
-      # Set Git directory to usable state
-      - name: Setup Git
-        run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
+          fetch-depth: 0
 
       - name: AI Doc Reviewer for Chinese docs
         uses: qiancai/ai-codereviewer@main
@@ -140,7 +144,7 @@ jobs:
           API_PROVIDER: "deepseek"
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_API_MODEL: "deepseek-chat"
-          exclude: "**/*.json,en/**"  # Exclude JSON files and English docs
+          exclude: "**/*.json,!(zh)/**"  # Exclude JSON files and non-Chinese docs
           REVIEW_MODE: ${{ needs.prepare.outputs.review_mode || 'default' }}
           COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha || '' }}
           BASE_SHA: ${{ needs.prepare.outputs.base_sha || '' }}
@@ -152,19 +156,10 @@ jobs:
     if: needs.prepare.outputs.en_files_count > 0
     runs-on: ubuntu-latest
     steps:
-      # Download repository from artifact instead of checking out again
-      - name: Download Repository
-        uses: actions/download-artifact@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
         with:
-          name: repository
-          path: .
-      
-      # Set Git directory to usable state
-      - name: Setup Git
-        run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
+          fetch-depth: 0
 
       - name: AI Doc Reviewer for English docs
         uses: qiancai/ai-codereviewer@main
