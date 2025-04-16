@@ -10,7 +10,7 @@ This document describes how to accss the TiDB cluster.
 
 You can configure Service with different types according to the scenarios, such as `ClusterIP`, `NodePort`, `LoadBalancer`, etc., and uses different access methods for different types.
 
-You can obtain TiDB Service information by running the following command:
+You can obtain TiDB Service information by run the following command:
 
 {{< copyable "shell-regular" >}}
 
