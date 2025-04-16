@@ -30,18 +30,6 @@ jobs:
       base_sha: ${{ steps.extract.outputs.BASE_SHA }}
       head_sha: ${{ steps.extract.outputs.HEAD_SHA }}
     steps:
-      - name: Set GitHub Step Output
-        id: test
-        run: |
-          echo "This step shows how to properly set GitHub output"
-          # The modern, recommended way to set outputs
-          echo "test_output=success" >> $GITHUB_OUTPUT
-          
-          # Show what's in GITHUB_OUTPUT
-          echo "GITHUB_OUTPUT file location: $GITHUB_OUTPUT"
-          echo "GITHUB_OUTPUT content:"
-          cat $GITHUB_OUTPUT || echo "Cannot read GITHUB_OUTPUT"
-          
       - name: Debug Info
         run: |
           echo "Event name: ${{ github.event_name }}"
@@ -66,7 +54,7 @@ jobs:
             echo "HEAD_SHA=${BASH_REMATCH[2]}" >> $GITHUB_OUTPUT
             echo "REVIEW_MODE=commit_range" >> $GITHUB_OUTPUT
             echo "Detected commit range"
-          # Match a single commit - Note that regex has been fixed to properly match
+          # Match a single commit
           elif [[ "$COMMENT" =~ \/bot-review:[[:space:]]*([a-f0-9]{7,40}) ]]; then
             echo "COMMIT_SHA=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             echo "REVIEW_MODE=single_commit" >> $GITHUB_OUTPUT
@@ -90,12 +78,11 @@ jobs:
           REVIEW_MODE="${{ steps.extract.outputs.REVIEW_MODE }}"
           echo "Review mode detected: $REVIEW_MODE"
           
-          # For single commit mode, try to process the commit directly first
+          # Process single commit mode
           if [[ "$REVIEW_MODE" == "single_commit" ]]; then
             COMMIT_SHA="${{ steps.extract.outputs.COMMIT_SHA }}"
             echo "Processing single commit mode with SHA: $COMMIT_SHA"
             
-            # Try to get files for this commit
             FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || echo "")
             
             if [[ -z "$FILES" ]]; then
@@ -111,7 +98,6 @@ jobs:
               fi
             fi
             
-            # Count files - this approach avoids using grep -c which might output unexpected text
             ZH_FILES=""
             EN_FILES=""
             
@@ -143,51 +129,86 @@ jobs:
             echo "zh_files_count=$ZH_COUNT" >> "$GITHUB_OUTPUT"
             echo "en_files_count=$EN_COUNT" >> "$GITHUB_OUTPUT"
             exit 0
-          fi
           
-          # Continue with PR-based processing for other modes
-          # Get PR number
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            if [[ "${{ github.ref }}" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
-              PR_NUMBER="${BASH_REMATCH[1]}"
-            else
-              {
-                echo "zh_files_count=0"
-                echo "en_files_count=0"
-              } >> $GITHUB_OUTPUT
-              exit 0 > /dev/null 2>&1
-            fi
-          else
-            # For issue_comment event - get PR number from different sources
-            PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH" || jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+          # Process commit range mode
+          elif [[ "$REVIEW_MODE" == "commit_range" ]]; then
+            BASE_SHA="${{ steps.extract.outputs.BASE_SHA }}"
+            HEAD_SHA="${{ steps.extract.outputs.HEAD_SHA }}"
+            echo "Processing commit range mode with SHA range: $BASE_SHA..$HEAD_SHA"
             
-            # Extract from issue URL if null
-            if [[ "$PR_NUMBER" == "null" ]]; then
-              ISSUE_URL=$(jq --raw-output .issue.html_url "$GITHUB_EVENT_PATH")
-              if [[ "$ISSUE_URL" =~ /pull/([0-9]+)$ ]]; then
-                PR_NUMBER="${BASH_REMATCH[1]}"
+            # Try to get files for this commit range
+            FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
+            
+            if [[ -z "$FILES" ]]; then
+              echo "Fetching commits $BASE_SHA and $HEAD_SHA"
+              git fetch --depth=1 origin $BASE_SHA $HEAD_SHA
+              FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
+              
+              if [[ -z "$FILES" ]]; then
+                echo "No files found in range $BASE_SHA..$HEAD_SHA"
+                echo "zh_files_count=0" >> "$GITHUB_OUTPUT"
+                echo "en_files_count=0" >> "$GITHUB_OUTPUT"
+                exit 0
               fi
             fi
-          fi
-          
-          # Get files based on review mode
-          if [[ -n "$PR_NUMBER" && "$PR_NUMBER" != "null" ]]; then
-            if [[ "$REVIEW_MODE" == "single_commit" ]]; then
-              COMMIT_SHA="${{ steps.extract.outputs.COMMIT_SHA }}"
-              FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || echo "")
-              if [[ -z "$FILES" ]]; then
-                git fetch --depth=1 origin $COMMIT_SHA
-                FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || git show --name-only --format="" $COMMIT_SHA 2>/dev/null || echo "")
+            
+            ZH_FILES=""
+            EN_FILES=""
+            
+            while IFS= read -r file; do
+              if [[ "$file" == zh/* ]]; then
+                ZH_FILES+="$file"$'\n'
+              elif [[ "$file" == en/* ]]; then
+                EN_FILES+="$file"$'\n'
               fi
-            elif [[ "$REVIEW_MODE" == "commit_range" ]]; then
-              BASE_SHA="${{ steps.extract.outputs.BASE_SHA }}"
-              HEAD_SHA="${{ steps.extract.outputs.HEAD_SHA }}"
-              FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
-              if [[ -z "$FILES" ]]; then
-                git fetch --depth=1 origin $BASE_SHA $HEAD_SHA
-                FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
+            done <<< "$FILES"
+            
+            # Count non-empty lines
+            ZH_COUNT=0
+            if [[ -n "$ZH_FILES" ]]; then
+              ZH_COUNT=$(echo "$ZH_FILES" | wc -l)
+            fi
+            
+            EN_COUNT=0
+            if [[ -n "$EN_FILES" ]]; then
+              EN_COUNT=$(echo "$EN_FILES" | wc -l)
+            fi
+            
+            echo "Files from commit range $BASE_SHA..$HEAD_SHA:"
+            echo "$FILES"
+            echo "Chinese files: $ZH_COUNT"
+            echo "English files: $EN_COUNT"
+            
+            # Set output variables
+            echo "zh_files_count=$ZH_COUNT" >> "$GITHUB_OUTPUT"
+            echo "en_files_count=$EN_COUNT" >> "$GITHUB_OUTPUT"
+            exit 0
+          
+          # Process default/latest mode (entire PR)
+          elif [[ "$REVIEW_MODE" == "latest" ]]; then
+            # Get PR number
+            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+              if [[ "${{ github.ref }}" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
+                PR_NUMBER="${BASH_REMATCH[1]}"
+              else
+                echo "zh_files_count=0" >> "$GITHUB_OUTPUT"
+                echo "en_files_count=0" >> "$GITHUB_OUTPUT"
+                exit 0
               fi
             else
+              # For issue_comment event - get PR number from different sources
+              PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH" || jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+              
+              # Extract from issue URL if null
+              if [[ "$PR_NUMBER" == "null" ]]; then
+                ISSUE_URL=$(jq --raw-output .issue.html_url "$GITHUB_EVENT_PATH")
+                if [[ "$ISSUE_URL" =~ /pull/([0-9]+)$ ]]; then
+                  PR_NUMBER="${BASH_REMATCH[1]}"
+                fi
+              fi
+            fi
+            
+            if [[ -n "$PR_NUMBER" && "$PR_NUMBER" != "null" ]]; then
               # Default: get files for the entire PR
               FILES=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json files --jq '.files[].path')
               if [[ -z "$FILES" ]]; then
@@ -200,30 +221,46 @@ jobs:
                   FILES=$(git diff --name-only $MERGE_BASE origin/$PR_HEAD)
                 fi
               fi
+              
+              ZH_FILES=""
+              EN_FILES=""
+              
+              while IFS= read -r file; do
+                if [[ "$file" == zh/* ]]; then
+                  ZH_FILES+="$file"$'\n'
+                elif [[ "$file" == en/* ]]; then
+                  EN_FILES+="$file"$'\n'
+                fi
+              done <<< "$FILES"
+              
+              # Count non-empty lines
+              ZH_COUNT=0
+              if [[ -n "$ZH_FILES" ]]; then
+                ZH_COUNT=$(echo "$ZH_FILES" | wc -l)
+              fi
+              
+              EN_COUNT=0
+              if [[ -n "$EN_FILES" ]]; then
+                EN_COUNT=$(echo "$EN_FILES" | wc -l)
+              fi
+              
+              echo "Files from PR $PR_NUMBER:"
+              echo "$FILES"
+              echo "Chinese files: $ZH_COUNT"
+              echo "English files: $EN_COUNT"
+              
+              echo "zh_files_count=$ZH_COUNT" >> "$GITHUB_OUTPUT"
+              echo "en_files_count=$EN_COUNT" >> "$GITHUB_OUTPUT"
+            else
+              echo "Could not determine PR number"
+              echo "zh_files_count=0" >> "$GITHUB_OUTPUT"
+              echo "en_files_count=0" >> "$GITHUB_OUTPUT"
             fi
-          elif [[ "$REVIEW_MODE" == "commit_range" ]]; then
-            # Handle commit range without PR
-            BASE_SHA="${{ steps.extract.outputs.BASE_SHA }}"
-            HEAD_SHA="${{ steps.extract.outputs.HEAD_SHA }}"
-            FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
-            if [[ -z "$FILES" ]]; then
-              git fetch --depth=1 origin $BASE_SHA $HEAD_SHA
-              FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
-            fi
+          else
+            echo "Invalid review mode"
+            echo "zh_files_count=0" >> "$GITHUB_OUTPUT"
+            echo "en_files_count=0" >> "$GITHUB_OUTPUT"
           fi
-          
-          # Count Chinese and English files
-          ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" 2>/dev/null || echo "0")
-          EN_COUNT=$(echo "$FILES" | grep -c "^en/" 2>/dev/null || echo "0")
-          
-          # Only write outputs, don't echo to terminal
-          {
-            echo "zh_files_count=$ZH_COUNT"
-            echo "en_files_count=$EN_COUNT"
-          } >> $GITHUB_OUTPUT
-          
-          # Ensure no output at end of script
-          true > /dev/null 2>&1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
