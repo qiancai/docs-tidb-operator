@@ -50,22 +50,22 @@ jobs:
           
           # Match commit range
           if [[ "$COMMENT" =~ \/bot-review:[[:space:]]*([a-f0-9]{7,40})[[:space:]]*\.\.[[:space:]]*([a-f0-9]{7,40}) ]]; then
-            echo "BASE_SHA=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-            echo "HEAD_SHA=${BASH_REMATCH[2]}" >> $GITHUB_OUTPUT
-            echo "REVIEW_MODE=commit_range" >> $GITHUB_OUTPUT
+            echo "BASE_SHA=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "HEAD_SHA=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+            echo "REVIEW_MODE=commit_range" >> "$GITHUB_OUTPUT"
             echo "Detected commit range"
           # Match a single commit - Note that regex has been fixed to properly match
           elif [[ "$COMMENT" =~ \/bot-review:[[:space:]]*([a-f0-9]{7,40}) ]]; then
-            echo "COMMIT_SHA=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-            echo "REVIEW_MODE=single_commit" >> $GITHUB_OUTPUT
+            echo "COMMIT_SHA=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "REVIEW_MODE=single_commit" >> "$GITHUB_OUTPUT"
             echo "Detected single commit: ${BASH_REMATCH[1]}"
           # Match "/bot-review" or "/bot-review "
           elif [[ "$COMMENT" =~ ^\/bot-review[[:space:]]*$ ]]; then
-            echo "REVIEW_MODE=latest" >> $GITHUB_OUTPUT
+            echo "REVIEW_MODE=latest" >> "$GITHUB_OUTPUT"
             echo "Detected default review mode"
           # Invalid format
           else
-            echo "REVIEW_MODE=invalid" >> $GITHUB_OUTPUT
+            echo "REVIEW_MODE=invalid" >> "$GITHUB_OUTPUT"
             echo "Invalid bot-review command format"
           fi
 
@@ -93,8 +93,8 @@ jobs:
               
               if [[ -z "$FILES" ]]; then
                 echo "No files found for commit $COMMIT_SHA"
-                echo "zh_files_count=0" >> $GITHUB_OUTPUT
-                echo "en_files_count=0" >> $GITHUB_OUTPUT
+                echo "zh_files_count=0" >> "$GITHUB_OUTPUT"
+                echo "en_files_count=0" >> "$GITHUB_OUTPUT"
                 exit 0
               fi
             fi
@@ -109,8 +109,9 @@ jobs:
             echo "Chinese files: $ZH_COUNT"
             echo "English files: $EN_COUNT"
             
-            echo "zh_files_count=$ZH_COUNT" >> $GITHUB_OUTPUT
-            echo "en_files_count=$EN_COUNT" >> $GITHUB_OUTPUT
+            # Fix output format
+            echo "zh_files_count=$ZH_COUNT" >> "$GITHUB_OUTPUT"
+            echo "en_files_count=$EN_COUNT" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           
@@ -120,8 +121,8 @@ jobs:
             if [[ "${{ github.ref }}" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
               PR_NUMBER="${BASH_REMATCH[1]}"
             else
-              echo "zh_files_count=0" >> $GITHUB_OUTPUT
-              echo "en_files_count=0" >> $GITHUB_OUTPUT
+              echo "zh_files_count=0" >> "$GITHUB_OUTPUT"
+              echo "en_files_count=0" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           else
@@ -183,8 +184,8 @@ jobs:
           ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
           EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
           
-          echo "zh_files_count=$ZH_COUNT" >> $GITHUB_OUTPUT
-          echo "en_files_count=$EN_COUNT" >> $GITHUB_OUTPUT
+          echo "zh_files_count=$ZH_COUNT" >> "$GITHUB_OUTPUT"
+          echo "en_files_count=$EN_COUNT" >> "$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
