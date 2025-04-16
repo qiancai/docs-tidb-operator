@@ -104,7 +104,8 @@ jobs:
             while IFS= read -r file; do
               if [[ "$file" == zh/* ]]; then
                 ZH_FILES+="$file"$'\n'
-              elif [[ "$file" == en/* ]]; then
+              else
+                # Count any non-zh file as English
                 EN_FILES+="$file"$'\n'
               fi
             done <<< "$FILES"
@@ -158,7 +159,8 @@ jobs:
             while IFS= read -r file; do
               if [[ "$file" == zh/* ]]; then
                 ZH_FILES+="$file"$'\n'
-              elif [[ "$file" == en/* ]]; then
+              else
+                # Count any non-zh file as English
                 EN_FILES+="$file"$'\n'
               fi
             done <<< "$FILES"
@@ -228,7 +230,8 @@ jobs:
               while IFS= read -r file; do
                 if [[ "$file" == zh/* ]]; then
                   ZH_FILES+="$file"$'\n'
-                elif [[ "$file" == en/* ]]; then
+                else
+                  # Count any non-zh file as English
                   EN_FILES+="$file"$'\n'
                 fi
               done <<< "$FILES"
