@@ -30,6 +30,18 @@ jobs:
       base_sha: ${{ steps.extract.outputs.BASE_SHA }}
       head_sha: ${{ steps.extract.outputs.HEAD_SHA }}
     steps:
+      - name: Set GitHub Step Output
+        id: test
+        run: |
+          echo "This step shows how to properly set GitHub output"
+          # The modern, recommended way to set outputs
+          echo "test_output=success" >> $GITHUB_OUTPUT
+          
+          # Show what's in GITHUB_OUTPUT
+          echo "GITHUB_OUTPUT file location: $GITHUB_OUTPUT"
+          echo "GITHUB_OUTPUT content:"
+          cat $GITHUB_OUTPUT || echo "Cannot read GITHUB_OUTPUT"
+          
       - name: Debug Info
         run: |
           echo "Event name: ${{ github.event_name }}"
