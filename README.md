@@ -31,7 +31,7 @@ Currently, we maintain the following versions for TiDB on Kubernetes documentati
 > **Note:**
 >
 > - Previously, we maintain the TiDB on Kubernetes documentation in the [docs](https://github.com/pingcap/docs) and [docs-cn](https://github.com/pingcap/docs-cn) repository.
-> - Since March 31, 2020, all the TiDB on Kubernetes documentation has been moved to this repository, and maintained based on versions in the branches above.
+> - Since March 31, 2020, all the TiDB on Kubernetes documentation has been moved to this repository, and maintained based on versions in the branches abve.
 
 ## License
 
