@@ -81,19 +81,22 @@ jobs:
         run: |
           echo "Getting PR diff to check file paths..."
           echo "Event name: ${{ github.event_name }}"
+          echo "Review mode: ${{ steps.extract.outputs.REVIEW_MODE }}"
 
-          # For debugging
+          # Initialize variables
+          PR_NUMBER=""
+          FILES=""
+
+          # Get PR number
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "Workflow triggered manually by workflow_dispatch"
-            # For workflow_dispatch, we need to check if we're on a PR branch
             if [[ "${{ github.ref }}" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
               PR_NUMBER="${BASH_REMATCH[1]}"
               echo "Extracted PR number from github.ref: $PR_NUMBER"
             else
               echo "Not running on a PR branch: ${{ github.ref }}"
-              # Set default counts for workflow_dispatch not on PR branch
-              echo "zh_files_count=1" >> $GITHUB_OUTPUT
-              echo "en_files_count=1" >> $GITHUB_OUTPUT
+              echo "zh_files_count=0" >> $GITHUB_OUTPUT
+              echo "en_files_count=0" >> $GITHUB_OUTPUT
               exit 0
             fi
           else
@@ -104,14 +107,43 @@ jobs:
 
           if [[ -n "$PR_NUMBER" && "$PR_NUMBER" != "null" ]]; then
             echo "Using PR number: $PR_NUMBER"
-            # Get the list of changed files
-            FILES=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json files --jq '.files[].path')
 
-            # Count files in zh/ and en/ directories
+            # Get file list based on REVIEW_MODE
+            REVIEW_MODE="${{ steps.extract.outputs.REVIEW_MODE }}"
+
+            if [[ "$REVIEW_MODE" == "single_commit" ]]; then
+              # Get files for a single commit
+              COMMIT_SHA="${{ steps.extract.outputs.COMMIT_SHA }}"
+              echo "Getting files for single commit: $COMMIT_SHA"
+              FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA)
+
+              # Ensure we have the commit
+              if [[ -z "$FILES" ]]; then
+                echo "No files found for commit $COMMIT_SHA, fetching remote changes"
+                git fetch --depth=1 origin $COMMIT_SHA
+                FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA)
+              fi
+            elif [[ "$REVIEW_MODE" == "commit_range" ]]; then
+              # Get files for a commit range
+              BASE_SHA="${{ steps.extract.outputs.BASE_SHA }}"
+              HEAD_SHA="${{ steps.extract.outputs.HEAD_SHA }}"
+              echo "Getting files for commit range: $BASE_SHA..$HEAD_SHA"
+
+              # Ensure we have both commits
+              git fetch --depth=1 origin $BASE_SHA $HEAD_SHA
+              FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA)
+            else
+              # Default: get files for the entire PR
+              echo "Getting files for entire PR"
+              FILES=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json files --jq '.files[].path')
+            fi
+
+            # Count Chinese and English files
             ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
             EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
 
-            echo "Changed files in PR #$PR_NUMBER:"
+            echo "Changed files:"
+            echo "$FILES"
             echo "Files in zh/: $ZH_COUNT"
             echo "Files in en/: $EN_COUNT"
 
@@ -119,9 +151,8 @@ jobs:
             echo "en_files_count=$EN_COUNT" >> $GITHUB_OUTPUT
           else
             echo "Could not determine PR number, setting defaults for review"
-            # Set default counts to trigger both reviewers for testing
-            echo "zh_files_count=1" >> $GITHUB_OUTPUT
-            echo "en_files_count=1" >> $GITHUB_OUTPUT
+            echo "zh_files_count=0" >> $GITHUB_OUTPUT
+            echo "en_files_count=0" >> $GITHUB_OUTPUT
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
