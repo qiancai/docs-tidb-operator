@@ -6,11 +6,11 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/advanced-statefulset/']
 
 # 增强型 StatefulSet 控制器
 
-Kubernetes 内置 [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) 为 Pods 分配连续的序号。比如 3 个副本时，Pods 分别为 pod-0, pod-1、pod-2。扩缩容时，必须在尾部增加或删除 Pods。比如扩容到 4 个副本时，会增 pod-3。缩容到 2 副本时，会删 pod-2。
+Kubernetes 内置 [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) 为 Pods 分配连续的序号。比如 3 个副本时，Pods 分别为 pod-0, pod-1, pod-2。扩缩容时，必须在尾部增加或删除 Pods。比如扩容到 4 个副本时，会新增 pod-3。缩容到 2 副本时，会删除 pod-2。
 
-在使用本地存储时，Pods 与 Nodes 存储资源绑定，无法自由调。若希望删除掉中间某个 Pod ，以便维护其所在的 Node 但并没有其他 Node 可以千移时，或者某个 Pod 故障想直接删除，另起一个序号不一样的 Pod 时，无法通过内置 StatefulSet 实。
+在使用本地存储时，Pods 与 Nodes 存储资源绑定，无法自由调度。若希望删除掉中间某个 Pod ，以便维护其所在的 Node 但并没有其他 Node 可以迁移时，或者某个 Pod 故障想直接删除，另起一个序号不一样的 Pod 时，无法通过内置 StatefulSet 实现。
 
-[增强型 StatefulSet 控制器](https://github.com/pingcap/advanced-statefulset) 基于内置 StatefulSet 实现，新增了自由控制 Pods 序号的功。本文介绍如何在 TiDB Operator 中使用。
+[增强型 StatefulSet 控制器](https://github.com/pingcap/advanced-statefulset) 基于内置 StatefulSet 实现，新增了自由控制 Pods 序号的功能。本文介绍如何在 TiDB Operator 中使用。
 
 ## 开启
 
