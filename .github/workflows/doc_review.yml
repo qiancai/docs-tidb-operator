@@ -46,18 +46,27 @@ jobs:
         if: github.event_name == 'issue_comment'
         run: |
           COMMENT="${{ github.event.comment.body }}"
+          echo "Raw comment: $COMMENT"
           
+          # Match commit range
           if [[ "$COMMENT" =~ \/bot-review:[[:space:]]*([a-f0-9]{7,40})[[:space:]]*\.\.[[:space:]]*([a-f0-9]{7,40}) ]]; then
             echo "BASE_SHA=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             echo "HEAD_SHA=${BASH_REMATCH[2]}" >> $GITHUB_OUTPUT
             echo "REVIEW_MODE=commit_range" >> $GITHUB_OUTPUT
-          elif [[ "$COMMENT" =~ \/bot-review:[[:space:]]+([a-f0-9]{7,40}) ]]; then
+            echo "Detected commit range"
+          # Match a single commit - Note that regex has been fixed to properly match
+          elif [[ "$COMMENT" =~ \/bot-review:[[:space:]]*([a-f0-9]{7,40}) ]]; then
             echo "COMMIT_SHA=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
             echo "REVIEW_MODE=single_commit" >> $GITHUB_OUTPUT
+            echo "Detected single commit: ${BASH_REMATCH[1]}"
+          # Match "/bot-review" or "/bot-review "
           elif [[ "$COMMENT" =~ ^\/bot-review[[:space:]]*$ ]]; then
             echo "REVIEW_MODE=latest" >> $GITHUB_OUTPUT
+            echo "Detected default review mode"
+          # Invalid format
           else
             echo "REVIEW_MODE=invalid" >> $GITHUB_OUTPUT
+            echo "Invalid bot-review command format"
           fi
 
       - name: Get PR diff
@@ -66,7 +75,46 @@ jobs:
           # Initialize variables
           PR_NUMBER=""
           FILES=""
-
+          REVIEW_MODE="${{ steps.extract.outputs.REVIEW_MODE }}"
+          echo "Review mode detected: $REVIEW_MODE"
+          
+          # For single commit mode, try to process the commit directly first
+          if [[ "$REVIEW_MODE" == "single_commit" ]]; then
+            COMMIT_SHA="${{ steps.extract.outputs.COMMIT_SHA }}"
+            echo "Processing single commit mode with SHA: $COMMIT_SHA"
+            
+            # Try to get files for this commit
+            FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || echo "")
+            
+            if [[ -z "$FILES" ]]; then
+              echo "Fetching commit $COMMIT_SHA"
+              git fetch --depth=1 origin $COMMIT_SHA
+              FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || git show --name-only --format="" $COMMIT_SHA 2>/dev/null || echo "")
+              
+              if [[ -z "$FILES" ]]; then
+                echo "No files found for commit $COMMIT_SHA"
+                echo "zh_files_count=0" >> $GITHUB_OUTPUT
+                echo "en_files_count=0" >> $GITHUB_OUTPUT
+                exit 0
+              fi
+            fi
+            
+            # Count files
+            echo "Files from commit $COMMIT_SHA:"
+            echo "$FILES"
+            
+            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
+            EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
+            
+            echo "Chinese files: $ZH_COUNT"
+            echo "English files: $EN_COUNT"
+            
+            echo "zh_files_count=$ZH_COUNT" >> $GITHUB_OUTPUT
+            echo "en_files_count=$EN_COUNT" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Continue with PR-based processing for other modes
           # Get PR number
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ github.ref }}" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
@@ -89,8 +137,6 @@ jobs:
             fi
           fi
 
-          REVIEW_MODE="${{ steps.extract.outputs.REVIEW_MODE }}"
-          
           # Get files based on review mode
           if [[ -n "$PR_NUMBER" && "$PR_NUMBER" != "null" ]]; then
             if [[ "$REVIEW_MODE" == "single_commit" ]]; then
@@ -122,13 +168,14 @@ jobs:
                 fi
               fi
             fi
-          elif [[ "$REVIEW_MODE" == "single_commit" && -n "${{ steps.extract.outputs.COMMIT_SHA }}" ]]; then
-            # No PR but we have a commit
-            COMMIT_SHA="${{ steps.extract.outputs.COMMIT_SHA }}"
-            FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || echo "")
+          elif [[ "$REVIEW_MODE" == "commit_range" ]]; then
+            # Handle commit range without PR
+            BASE_SHA="${{ steps.extract.outputs.BASE_SHA }}"
+            HEAD_SHA="${{ steps.extract.outputs.HEAD_SHA }}"
+            FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
             if [[ -z "$FILES" ]]; then
-              git fetch --depth=1 origin $COMMIT_SHA
-              FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || echo "")
+              git fetch --depth=1 origin $BASE_SHA $HEAD_SHA
+              FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
             fi
           fi
 
