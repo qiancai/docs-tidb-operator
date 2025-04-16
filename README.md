@@ -15,7 +15,7 @@ You can use Google Translate to view the documentation in different languages. F
 
 ## Documentation versions
 
-Currently, we maintain the following versions for TiDB on Kubernetes documentation, each with a separate branch:
+Currently, we maintan the following versions for TiDB on Kubernetes documentation, each with separate branch:
 
 | Branch name | Version description |
 | :--- | :-- |
