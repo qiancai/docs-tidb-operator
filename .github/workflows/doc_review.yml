@@ -42,22 +42,6 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history for all branches and tags
 
-      - name: Setup GitHub CLI
-        run: |
-          # Check if GitHub CLI is installed
-          if ! command -v gh &> /dev/null; then
-            echo "GitHub CLI not found, installing..."
-            # Install GitHub CLI (should be available on GitHub-hosted runners, but adding for completeness)
-            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-            sudo apt update
-            sudo apt install gh
-          fi
-          # Verify GitHub CLI installation
-          gh --version
-          # Ensure auth is properly set
-          echo "Using GITHUB_TOKEN for authentication"
-
       - name: Extract review parameters
         id: extract
         if: github.event_name == 'issue_comment'
@@ -96,33 +80,21 @@ jobs:
         id: diff
         run: |
           echo "Getting PR diff to check file paths..."
-          
-          # Try to get PR number - first from pull_request event, then from issue
-          PR_NUMBER=""
-          if [[ -f "$GITHUB_EVENT_PATH" ]]; then
-            PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
-            if [[ -z "$PR_NUMBER" || "$PR_NUMBER" == "null" ]]; then
-              PR_NUMBER=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
-            fi
-          fi
-          
-          if [[ -n "$PR_NUMBER" && "$PR_NUMBER" != "null" ]]; then
-            echo "PR number found: $PR_NUMBER"
-            
-            # Make sure gh CLI is installed and authenticated
-            echo "Using GitHub CLI to get changed files..."
-            
+
+          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH" || jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+
+          if [[ -n "$PR_NUMBER" ]]; then
             # Get the list of changed files
             FILES=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json files --jq '.files[].path')
-            
+
             # Count files in zh/ and en/ directories
-            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
-            EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
-            
+            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/")
+            EN_COUNT=$(echo "$FILES" | grep -c "^en/")
+
             echo "Changed files in PR #$PR_NUMBER:"
             echo "Files in zh/: $ZH_COUNT"
             echo "Files in en/: $EN_COUNT"
-            
+
             echo "zh_files_count=$ZH_COUNT" >> $GITHUB_OUTPUT
             echo "en_files_count=$EN_COUNT" >> $GITHUB_OUTPUT
           else
@@ -132,36 +104,19 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # Upload repository as an artifact to be used by downstream jobs
-      - name: Upload Repository
-        uses: actions/upload-artifact@v3.1.3
-        with:
-          name: repository
-          path: .
-          retention-days: 1
 
   review-zh:
     needs: prepare
     if: needs.prepare.outputs.zh_files_count > 0
     runs-on: ubuntu-latest
     steps:
-      # Download repository from artifact instead of checking out again
-      - name: Download Repository
-        uses: actions/download-artifact@v3.1.3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
         with:
-          name: repository
-          path: .
-      
-      # Set Git directory to usable state
-      - name: Setup Git
-        run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
+          fetch-depth: 0
 
       - name: AI Doc Reviewer for Chinese docs
-        uses: qiancai/ai-codereviewer@test-gpt
+        uses: qiancai/ai-codereviewer@main
         continue-on-error: false
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -180,19 +135,10 @@ jobs:
     if: needs.prepare.outputs.en_files_count > 0
     runs-on: ubuntu-latest
     steps:
-      # Download repository from artifact instead of checking out again
-      - name: Download Repository
-        uses: actions/download-artifact@v3.1.3
+      - name: Checkout Repo
+        uses: actions/checkout@v3
         with:
-          name: repository
-          path: .
-      
-      # Set Git directory to usable state
-      - name: Setup Git
-        run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
+          fetch-depth: 0
 
       - name: AI Doc Reviewer for English docs
         uses: qiancai/ai-codereviewer@main
