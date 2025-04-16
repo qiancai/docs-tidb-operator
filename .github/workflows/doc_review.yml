@@ -30,6 +30,18 @@ jobs:
       base_sha: ${{ steps.extract.outputs.BASE_SHA }}
       head_sha: ${{ steps.extract.outputs.HEAD_SHA }}
     steps:
+      - name: Set GitHub Step Output
+        id: test
+        run: |
+          echo "This step shows how to properly set GitHub output"
+          # The modern, recommended way to set outputs
+          echo "test_output=success" >> $GITHUB_OUTPUT
+          
+          # Show what's in GITHUB_OUTPUT
+          echo "GITHUB_OUTPUT file location: $GITHUB_OUTPUT"
+          echo "GITHUB_OUTPUT content:"
+          cat $GITHUB_OUTPUT || echo "Cannot read GITHUB_OUTPUT"
+
       - name: Debug Info
         run: |
           echo "Event name: ${{ github.event_name }}"
@@ -93,28 +105,43 @@ jobs:
               
               if [[ -z "$FILES" ]]; then
                 echo "No files found for commit $COMMIT_SHA"
-                {
-                  echo "zh_files_count=0"
-                  echo "en_files_count=0"
-                } >> $GITHUB_OUTPUT
+                echo "zh_files_count=0" >> "$GITHUB_OUTPUT"
+                echo "en_files_count=0" >> "$GITHUB_OUTPUT"
                 exit 0
               fi
             fi
             
-            # Count files
+            # Count files - this approach avoids using grep -c which might output unexpected text
+            ZH_FILES=""
+            EN_FILES=""
+            
+            while IFS= read -r file; do
+              if [[ "$file" == zh/* ]]; then
+                ZH_FILES+="$file"$'\n'
+              elif [[ "$file" == en/* ]]; then
+                EN_FILES+="$file"$'\n'
+              fi
+            done <<< "$FILES"
+            
+            # Count non-empty lines
+            ZH_COUNT=0
+            if [[ -n "$ZH_FILES" ]]; then
+              ZH_COUNT=$(echo "$ZH_FILES" | wc -l)
+            fi
+            
+            EN_COUNT=0
+            if [[ -n "$EN_FILES" ]]; then
+              EN_COUNT=$(echo "$EN_FILES" | wc -l)
+            fi
+            
             echo "Files from commit $COMMIT_SHA:"
             echo "$FILES"
-            
-            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
-            EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
-            
             echo "Chinese files: $ZH_COUNT"
             echo "English files: $EN_COUNT"
             
-            {
-              echo "zh_files_count=$ZH_COUNT"
-              echo "en_files_count=$EN_COUNT"
-            } >> $GITHUB_OUTPUT
+            # Set output variables
+            echo "zh_files_count=$ZH_COUNT" >> "$GITHUB_OUTPUT"
+            echo "en_files_count=$EN_COUNT" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           
@@ -128,7 +155,7 @@ jobs:
                 echo "zh_files_count=0"
                 echo "en_files_count=0"
               } >> $GITHUB_OUTPUT
-              exit 0
+              exit 0 > /dev/null 2>&1
             fi
           else
             # For issue_comment event - get PR number from different sources
@@ -186,13 +213,17 @@ jobs:
           fi
           
           # Count Chinese and English files
-          ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
-          EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
+          ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" 2>/dev/null || echo "0")
+          EN_COUNT=$(echo "$FILES" | grep -c "^en/" 2>/dev/null || echo "0")
           
+          # Only write outputs, don't echo to terminal
           {
             echo "zh_files_count=$ZH_COUNT"
             echo "en_files_count=$EN_COUNT"
           } >> $GITHUB_OUTPUT
+          
+          # Ensure no output at end of script
+          true > /dev/null 2>&1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
