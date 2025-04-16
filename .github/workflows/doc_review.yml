@@ -115,23 +115,57 @@ jobs:
               # Get files for a single commit
               COMMIT_SHA="${{ steps.extract.outputs.COMMIT_SHA }}"
               echo "Getting files for single commit: $COMMIT_SHA"
-              FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA)
-
-              # Ensure we have the commit
+              
+              # Try local first
+              FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || echo "")
+              
+              # If no files found, fetch and try again
               if [[ -z "$FILES" ]]; then
-                echo "No files found for commit $COMMIT_SHA, fetching remote changes"
-                git fetch --depth=1 origin $COMMIT_SHA
-                FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA)
+                echo "No files found locally for commit $COMMIT_SHA, fetching from remote"
+                if git fetch --depth=1 origin $COMMIT_SHA; then
+                  echo "Fetch successful, getting files again"
+                  FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_SHA 2>/dev/null || echo "")
+                  
+                  if [[ -z "$FILES" ]]; then
+                    echo "WARNING: Still no files found after fetch for commit $COMMIT_SHA"
+                    echo "Attempting alternative approach with git show"
+                    FILES=$(git show --name-only --format="" $COMMIT_SHA 2>/dev/null || echo "")
+                  fi
+                else
+                  echo "ERROR: Failed to fetch commit $COMMIT_SHA"
+                fi
               fi
+              
+              # Log files found for debugging
+              echo "Files found for commit $COMMIT_SHA:"
+              echo "$FILES"
             elif [[ "$REVIEW_MODE" == "commit_range" ]]; then
               # Get files for a commit range
               BASE_SHA="${{ steps.extract.outputs.BASE_SHA }}"
               HEAD_SHA="${{ steps.extract.outputs.HEAD_SHA }}"
               echo "Getting files for commit range: $BASE_SHA..$HEAD_SHA"
 
-              # Ensure we have both commits
-              git fetch --depth=1 origin $BASE_SHA $HEAD_SHA
-              FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA)
+              # Try local first
+              FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
+              
+              # If no files found, fetch and try again
+              if [[ -z "$FILES" ]]; then
+                echo "No files found locally for range $BASE_SHA..$HEAD_SHA, fetching from remote"
+                if git fetch --depth=1 origin $BASE_SHA $HEAD_SHA; then
+                  echo "Fetch successful, getting files again"
+                  FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || echo "")
+                  
+                  if [[ -z "$FILES" ]]; then
+                    echo "WARNING: Still no files found after fetch for range $BASE_SHA..$HEAD_SHA"
+                  fi
+                else
+                  echo "ERROR: Failed to fetch commits for range $BASE_SHA..$HEAD_SHA"
+                fi
+              fi
+              
+              # Log files found for debugging
+              echo "Files found for commit range $BASE_SHA..$HEAD_SHA:"
+              echo "$FILES"
             else
               # Default: get files for the entire PR
               echo "Getting files for entire PR"
@@ -139,13 +173,25 @@ jobs:
             fi
 
             # Count Chinese and English files
-            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
-            EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
+            echo "Counting files in zh/ and en/ directories..."
+            
+            # Use grep to find zh/ and en/ files and save the output for logging
+            ZH_FILES=$(echo "$FILES" | grep "^zh/" || echo "")
+            EN_FILES=$(echo "$FILES" | grep "^en/" || echo "")
+            
+            # Count the files
+            ZH_COUNT=$(echo "$ZH_FILES" | grep -c "^" || echo "0")
+            EN_COUNT=$(echo "$EN_FILES" | grep -c "^" || echo "0")
 
-            echo "Changed files:"
+            echo "Changed files (total):"
             echo "$FILES"
-            echo "Files in zh/: $ZH_COUNT"
-            echo "Files in en/: $EN_COUNT"
+            echo "------------------------------"
+            echo "Chinese files found ($ZH_COUNT):"
+            echo "$ZH_FILES"
+            echo "------------------------------"
+            echo "English files found ($EN_COUNT):"
+            echo "$EN_FILES"
+            echo "------------------------------"
 
             echo "zh_files_count=$ZH_COUNT" >> $GITHUB_OUTPUT
             echo "en_files_count=$EN_COUNT" >> $GITHUB_OUTPUT
@@ -175,11 +221,11 @@ jobs:
           API_PROVIDER: "deepseek"
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_API_MODEL: "deepseek-chat"
-          exclude: "**/*.json,!zh/**"  # Exclude JSON files and non-Chinese docs
-          REVIEW_MODE: ${{ needs.prepare.outputs.review_mode || 'default' }}
-          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha || '' }}
-          BASE_SHA: ${{ needs.prepare.outputs.base_sha || '' }}
-          HEAD_SHA: ${{ needs.prepare.outputs.head_sha || '' }}
+          exclude: "**/*.json,!zh/**"
+          REVIEW_MODE: ${{ needs.prepare.outputs.review_mode }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+          BASE_SHA: ${{ needs.prepare.outputs.base_sha }}
+          HEAD_SHA: ${{ needs.prepare.outputs.head_sha }}
           PROMPT_PATH: "doc-review-prompt-zh.txt"
 
   review-en:
@@ -200,9 +246,10 @@ jobs:
           API_PROVIDER: "openai"
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_MODEL: "gpt-4"
-          exclude: "**/*.json,zh/**"  # Exclude JSON files and Chinese docs
-          REVIEW_MODE: ${{ needs.prepare.outputs.review_mode || 'default' }}
-          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha || '' }}
-          BASE_SHA: ${{ needs.prepare.outputs.base_sha || '' }}
-          HEAD_SHA: ${{ needs.prepare.outputs.head_sha || '' }}
+          exclude: "**/*.json,zh/**"
+          include: "en/**"  # Only include English docs
+          REVIEW_MODE: ${{ needs.prepare.outputs.review_mode }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+          BASE_SHA: ${{ needs.prepare.outputs.base_sha }}
+          HEAD_SHA: ${{ needs.prepare.outputs.head_sha }}
           PROMPT_PATH: "doc-review-prompt-en.txt"
