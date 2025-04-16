@@ -38,7 +38,7 @@ jobs:
           echo "Comment author: ${{ github.event.comment.user.login || 'No user' }}"
 
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Fetch all history for all branches and tags
 
@@ -135,7 +135,7 @@ jobs:
       
       # Upload repository as an artifact to be used by downstream jobs
       - name: Upload Repository
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: repository
           path: .
@@ -148,7 +148,7 @@ jobs:
     steps:
       # Download repository from artifact instead of checking out again
       - name: Download Repository
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.1.3
         with:
           name: repository
           path: .
@@ -182,7 +182,7 @@ jobs:
     steps:
       # Download repository from artifact instead of checking out again
       - name: Download Repository
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.1.3
         with:
           name: repository
           path: .
