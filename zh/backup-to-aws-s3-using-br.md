@@ -8,7 +8,7 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/backup-to-aws-s3-using-br/']
 
 # 使用 BR 备份 TiDB 集群数据到兼容 S3 的存储
 
-本文介绍如何将运行在 AWS Kubernetes 环境中的 TiDB 集群数据备份到 AWS 的存储上。其中包括以下两种备份方式：
+本文介绍如何将运在 AWS Kubernetes 环境中的 TiDB 集群数据备份到 AWS 的存储上。其中包括以下两种备份方式：
 
 - **快照备份**。使用快照备份，你可以通过[全量恢复](restore-from-aws-s3-using-br.md#全量恢复)将 TiDB 集群恢复到快照备份的时刻点。
 - **日志备份**。使用快照备份与日志备份，你可以通过快照备份与日志备份产生的备份数据将 TiDB 集群恢复到历史任意时刻点，即 [Point-in-Time Recovery (PITR)](restore-from-aws-s3-using-br.md#pitr-恢复)。

@@ -1,6 +1,6 @@
 # TiDB on Kubernetes Documentation
 
-This repository stores all the source files of [TiDB on Kubernetes documentation](https://docs.pingcap.com/tidb-in-kubernetes/stable/) at the PingCAP website. That is, the documentation for [TiDB Operator](https://github.com/pingcap/tidb-operator).
+This repository store all the source files of [TiDB on Kubernetes documentation](https://docs.pingcap.com/tidb-in-kubernetes/stable/) at the PingCAP website. That is, the documentation for [TiDB Operator](https://github.com/pingcap/tidb-operator).
 
 Currently, the official documentation supports two languages:
 
