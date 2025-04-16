@@ -80,16 +80,36 @@ jobs:
         id: diff
         run: |
           echo "Getting PR diff to check file paths..."
+          echo "Event name: ${{ github.event_name }}"
 
-          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH" || jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+          # For debugging
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Workflow triggered manually by workflow_dispatch"
+            # For workflow_dispatch, we need to check if we're on a PR branch
+            if [[ "${{ github.ref }}" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
+              PR_NUMBER="${BASH_REMATCH[1]}"
+              echo "Extracted PR number from github.ref: $PR_NUMBER"
+            else
+              echo "Not running on a PR branch: ${{ github.ref }}"
+              # Set default counts for workflow_dispatch not on PR branch
+              echo "zh_files_count=1" >> $GITHUB_OUTPUT
+              echo "en_files_count=1" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          else
+            # For issue_comment event
+            PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH" || jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+            echo "Extracted PR number from event path: $PR_NUMBER"
+          fi
 
-          if [[ -n "$PR_NUMBER" ]]; then
+          if [[ -n "$PR_NUMBER" && "$PR_NUMBER" != "null" ]]; then
+            echo "Using PR number: $PR_NUMBER"
             # Get the list of changed files
             FILES=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json files --jq '.files[].path')
 
             # Count files in zh/ and en/ directories
-            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/")
-            EN_COUNT=$(echo "$FILES" | grep -c "^en/")
+            ZH_COUNT=$(echo "$FILES" | grep -c "^zh/" || echo "0")
+            EN_COUNT=$(echo "$FILES" | grep -c "^en/" || echo "0")
 
             echo "Changed files in PR #$PR_NUMBER:"
             echo "Files in zh/: $ZH_COUNT"
@@ -98,9 +118,10 @@ jobs:
             echo "zh_files_count=$ZH_COUNT" >> $GITHUB_OUTPUT
             echo "en_files_count=$EN_COUNT" >> $GITHUB_OUTPUT
           else
-            echo "Could not determine PR number, setting defaults"
-            echo "zh_files_count=0" >> $GITHUB_OUTPUT
-            echo "en_files_count=0" >> $GITHUB_OUTPUT
+            echo "Could not determine PR number, setting defaults for review"
+            # Set default counts to trigger both reviewers for testing
+            echo "zh_files_count=1" >> $GITHUB_OUTPUT
+            echo "en_files_count=1" >> $GITHUB_OUTPUT
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
