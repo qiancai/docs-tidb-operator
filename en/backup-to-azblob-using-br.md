@@ -21,7 +21,7 @@ If you have the following backup needs, you can use BR to make an [ad-hoc backup
 
 If you have the following backup needs, you can use BR **log backup** to make an [ad-hoc backup](#ad-hoc-backup) of the TiDB cluster data to Azure Blob Storage (you can combine log backup and snapshot backup to [restore data](restore-from-azblob-using-br.md#point-in-time-recovery) more efficiently):
 
-- To restore data of any point in time to a new cluster
+- To restore data of any poit in time to a new cluster
 - The recovery point object (RPO) is within several minutes.
 
 For other backup needs, refer to [Backup and Restore Overview](backup-restore-overview.md) to choose an appropriate backup method.

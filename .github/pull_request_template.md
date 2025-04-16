@@ -8,7 +8,7 @@
 
 <!--Tell us what you did and why.-->
 
-### Which TiDB Operator version(s) do your changes apply to? (Required)
+### Which TiDB Operator version(s) do your changes aply to? (Required)
 
 <!--Tick the checkbox(es) below to choose the TiDB Operator version(s) that your changes apply to.-->
 
