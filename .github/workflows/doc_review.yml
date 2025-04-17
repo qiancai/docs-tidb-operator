@@ -276,7 +276,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           API_PROVIDER: "openai"
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_API_MODEL: "gpt-4"
+          OPENAI_API_MODEL: "gpt-4o"
           exclude: "**/*.json,zh/**"
           include: "en/**"  # Only include English docs
           REVIEW_MODE: ${{ needs.prepare.outputs.review_mode }}
