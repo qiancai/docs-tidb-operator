@@ -2,7 +2,7 @@
 
 ### First-time contributors' checklist <!--Remove this section if you're not a first-time contributor.-->
 
-- [ ] I've signed [**Contributor License Agreement**](https://cla-assistant.io/pingcap/docs-tidb-operator) that's required for repo owners to accept my contribution.
+- [ ] I've signed the [**Contributor License Agreement**](https://cla.pingcap.net/pingcap/docs), which is required for the repository owners to accept my contribution.
 
 ### What is changed, added, or deleted? (Required)
 
@@ -12,7 +12,8 @@
 
 <!--Tick the checkbox(es) below to choose the TiDB Operator version(s) that your changes apply to.-->
 
-- [ ] master (the latest development version)
+- [ ] master (the latest development version for v1.x)
+- [ ] feature/v2 (the latest development version for v2.x)
 - [ ] v2.0 (TiDB Operator 2.0 versions)
 - [ ] v1.6 (TiDB Operator 1.6 versions)
 - [ ] v1.5 (TiDB Operator 1.5 versions)

@@ -20,11 +20,11 @@ This section introduces the fields in the `Backup` CR.
 
     - When using BR for backup, you can specify the BR version in this field.
         - If the field is not specified or the value is empty, the `pingcap/br:${tikv_version}` image is used for backup by default.
-        - If the BR version is specified in this field, such as `.spec.toolImage: pingcap/br:v8.5.0`, the image of the specified version is used for backup.
+        - If the BR version is specified in this field, such as `.spec.toolImage: pingcap/br:{{{ .tidb_version }}}`, the image of the specified version is used for backup.
         - If an image is specified without the version, such as `.spec.toolImage: private/registry/br`, the `private/registry/br:${tikv_version}` image is used for backup.
     - When using Dumpling for backup, you can specify the Dumpling version in this field.
-        - If the Dumpling version is specified in this field, such as `spec.toolImage: pingcap/dumpling:v8.5.0`, the image of the specified version is used for backup.
-        - If the field is not specified, the Dumpling version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](https://github.com/pingcap/tidb-operator/blob/v1.6.1/images/tidb-backup-manager/Dockerfile) is used for backup by default.
+        - If the Dumpling version is specified in this field, such as `spec.toolImage: pingcap/dumpling:{{{ .tidb_version }}}`, the image of the specified version is used for backup.
+        - If the field is not specified, the Dumpling version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](<https://github.com/pingcap/tidb-operator/blob/{{{ .tidb_operator_version }}}/images/tidb-backup-manager/Dockerfile>) is used for backup by default.
 
 * `.spec.backupType`: the backup type. This field is valid only when you use BR for backup. Currently, the following three types are supported, and this field can be combined with the `.spec.tableFilter` field to configure table filter rules:
     * `full`: back up all databases in a TiDB cluster.
@@ -258,6 +258,14 @@ This section introduces the fields in the `Backup` CR.
 * `.spec.local.volume`: the persistent volume configuration.
 * `.spec.local.volumeMount`: the persistent volume mount configuration.
 
+### Prune field
+
+* `.spec.prune`: supported in BR v9.0.0 and later versions. Currently, this field only supports the value `afterFailed`, which enables automatic cleanup of metadata tables when a restore task fails. Enabling the `prune` field affects the final status of the restore task. If the restore task ends in the `Failed` status, a cleanup task is automatically triggered to remove metadata table information. Based on the cleanup task status, the restore task displays one of the following statuses:
+    * `PruneScheduled`: the cleanup task is scheduled but has not started.
+    * `PruneRunning`: the cleanup task is running.
+    * `PruneComplete`: the cleanup task completed successfully.
+    * `PruneFailed`: the cleanup task failed.
+
 ## CompactBackup CR fields
 
 For TiDB v9.0.0 and later versions, you can use `CompactBackup` to accelerate PITR (Point-in-time recovery). To compact log backup data into structured SST files, you can create a custom `CompactBackup` CR object to define a backup task. The following introduces the fields in the `CompactBackup` CR:
@@ -294,8 +302,8 @@ This section introduces the fields in the `Restore` CR.
 * `.spec.metadata.namespace`: the namespace where the `Restore` CR is located.
 * `.spec.toolImage`：the tools image used by `Restore`. TiDB Operator supports this configuration starting from v1.1.9.
 
-    - When using BR for restoring, you can specify the BR version in this field. For example,`spec.toolImage: pingcap/br:v8.5.0`. If not specified, `pingcap/br:${tikv_version}` is used for restoring by default.
-    - When using Lightning for restoring, you can specify the Lightning version in this field. For example, `spec.toolImage: pingcap/lightning:v8.5.0`. If not specified, the Lightning version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](https://github.com/pingcap/tidb-operator/blob/v1.6.1/images/tidb-backup-manager/Dockerfile) is used for restoring by default.
+    - When using BR for restoring, you can specify the BR version in this field. For example,`spec.toolImage: pingcap/br:{{{ .tidb_version }}}`. If not specified, `pingcap/br:${tikv_version}` is used for restoring by default.
+    - When using Lightning for restoring, you can specify the Lightning version in this field. For example, `spec.toolImage: pingcap/lightning:{{{ .tidb_version }}}`. If not specified, the Lightning version specified in `TOOLKIT_VERSION` of the [Backup Manager Dockerfile](<https://github.com/pingcap/tidb-operator/blob/{{{ .tidb_operator_version }}}/images/tidb-backup-manager/Dockerfile>) is used for restoring by default.
 
 * `.spec.backupType`: the restore type. This field is valid only when you use BR to restore data. Currently, the following three types are supported, and this field can be combined with the `.spec.tableFilter` field to configure table filter rules:
     * `full`: restore all databases in a TiDB cluster.
@@ -372,6 +380,7 @@ This section introduces the fields in the `Restore` CR.
 * `.spec.gcs`: GCS-related configuration. Refer to [GCS fields](#gcs-fields).
 * `.spec.azblob`：Azure Blob Storage-related configuration. Refer to [Azure Blob Storage fields](#azure-blob-storage-fields).
 * `.spec.local`: persistent volume-related configuration. Refer to [Local storage fields](#local-storage-fields).
+* `.spec.prune`: supported in BR v9.0.0 and later versions. Currently, this field only supports the value `afterFailed`, which enables automatic cleanup of metadata tables when a restore task fails. Refer to [Prune field](#prune-field).
 
 ## BackupSchedule CR fields
 
