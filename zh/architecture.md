@@ -6,7 +6,7 @@ aliases: ['/docs-cn/tidb-in-kubernetes/dev/architecture/']
 
 # TiDB Operator 架构
 
-本文档介绍 TiDB Operator 的架构及其工作原理。
+本文档介绍 TiDB Operator 的架构及其工作原。
 
 ## 架构
 
